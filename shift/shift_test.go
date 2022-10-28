@@ -82,12 +82,12 @@ func TestWestbound12(t *testing.T) {
 	checkResult(t, -12, result)
 }
 
-func TestEastbound5Hour30Minunte(t *testing.T) {
+func TestEastbound5Hour30Minute(t *testing.T) {
 	var result = CalcTimezoneShift(0, 5.5)
 	checkResult(t, 5, result)
 }
 
-func TestWestbound5Hour30Minunte(t *testing.T) {
+func TestWestbound5Hour30Minute(t *testing.T) {
 	var result = CalcTimezoneShift(0, -5.5)
 	checkResult(t, -5, result)
 }
