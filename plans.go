@@ -19,6 +19,7 @@ const t2400 = time.Hour * 24
 const oneHour = time.Hour
 const twoHours = time.Hour * 2
 const threeHours = time.Hour * 3
+const fiveHours = time.Hour * 5
 
 func East12(c *Calculator) []Step {
 	return []Step{
@@ -347,6 +348,52 @@ func West56(c *Calculator) []Step {
 
 		//Events
 		SetWatch{at: c.departureLess1At(c.dinner() + threeHours)},
+		c.arrivalStep(),
+	}
+}
+
+func West78(c *Calculator) []Step {
+	departureWake := c.wake() + threeHours
+	departureBreakfast := min(c.breakfast()+threeHours, c.wake()+fiveHours)
+
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess3At(c.wake()), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.departureLess1At(t1500)},
+		CaffeineOk{start: c.departureLess1At(t1500), end: c.departureLess1At(t1630)},
+		NoCaffeine{start: c.departureLess1At(t1630), end: c.departureAt(departureWake)},
+		Caffeine3C{start: c.departureAt(departureWake), end: c.departureAt(t1130)},
+		NoCaffeine{start: c.departureAt(t1130), end: c.arrivalAt(c.sleep())},
+
+		//Meals
+		HeavyBreakfast{start: c.departureLess3At(c.breakfast())},
+		HeavyLunch{start: c.departureLess3At(c.lunch())},
+		HeavyDinner{start: c.departureLess3At(c.dinner())},
+		LightBreakfast{start: c.departureLess2At(c.breakfast())},
+		LightLunch{start: c.departureLess2At(c.lunch())},
+		LightDinner{start: c.departureLess2At(c.dinner())},
+		NoSnack{start: c.departureLess2At(c.dinner() + oneHour), end: c.departureLess2At(c.sleep())},
+		HeavyBreakfast{start: c.departureLess1At(c.breakfast())},
+		HeavyLunch{start: c.departureLess1At(c.lunch())},
+		HeavyDinner{start: c.departureLess1At(c.dinner())},
+		LightBreakfast{start: c.departureAt(departureBreakfast)},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
+
+		//Sleep
+		Sleep{start: c.departureLess3At(c.sleep()), end: c.departureLess2At(c.wake())},
+		Sleep{start: c.departureLess2At(c.sleep()), end: c.departureLess1At(c.wake())},
+		Sleep{start: c.departureLess1At(c.sleep()), end: c.departureAt(departureWake)},
+		Sleep{start: c.departureAt(departureBreakfast + oneHour), end: c.arrivalAt(c.breakfast())},
+		NoNap{start: c.arrivalAt(c.breakfast()), end: c.arrivalAt(c.sleep())},
+		Sleep{start: c.arrivalAt(c.sleep()), end: c.arrivalPlus1At(c.wake())},
+
+		//Events
+		SetWatch{at: c.departureAt(departureBreakfast + oneHour)},
 		c.arrivalStep(),
 	}
 }
