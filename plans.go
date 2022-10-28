@@ -108,7 +108,7 @@ func East56(c *Calculator) []Step {
 		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
 		HeavyLunch{start: c.departureLess2At(c.lunch())},
 		HeavyDinner{start: c.departureLess2At(c.dinner())},
-		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess3At(c.sleep())},
+		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess2At(c.sleep())},
 		LightBreakfast{start: c.departureLess1At(c.breakfast())},
 		LightLunch{start: c.departureLess1At(c.lunch())},
 		LightDinner{start: c.departureLess1At(pre1Dinner)},
@@ -158,7 +158,7 @@ func East78(c *Calculator) []Step {
 		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
 		HeavyLunch{start: c.departureLess2At(c.lunch())},
 		HeavyDinner{start: c.departureLess2At(c.dinner())},
-		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess3At(c.sleep())},
+		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess2At(c.sleep())},
 		LightBreakfast{start: c.departureLess1At(c.breakfast())},
 		LightLunch{start: c.departureLess1At(c.lunch())},
 		LightDinnerOptional{start: c.departureLess1At(pre1Dinner)},
@@ -175,6 +175,58 @@ func East78(c *Calculator) []Step {
 		//Events
 		SetWatch{at: c.departureLess1At(t1800)},
 		c.arrivalStep(),
+	}
+}
+
+func East910(c *Calculator) []Step {
+	arrivalSleep := min(c.sleep(), t2200)
+	arrivalDinner := min(c.dinner(), arrivalSleep-time.Hour)
+
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess4At(c.wake()), end: c.departureLess4At(t1500)},
+		CaffeineOk{start: c.departureLess4At(t1500), end: c.departureLess4At(t1630)},
+		NoCaffeine{start: c.departureLess4At(t1630), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.arrivalAt(c.breakfast())},
+		Caffeine3C{start: c.arrivalAt(c.breakfast()), end: c.arrivalAt(c.breakfast() + time.Hour)},
+		NoCaffeine{start: c.arrivalAt(c.breakfast() + time.Hour), end: c.arrivalAt(c.sleep())},
+
+		//Meals
+		HeavyBreakfast{start: c.departureLess4At(c.breakfast())},
+		HeavyLunch{start: c.departureLess4At(c.lunch())},
+		HeavyDinner{start: c.departureLess4At(c.dinner())},
+		LightBreakfast{start: c.departureLess3At(c.breakfast())},
+		LightLunch{start: c.departureLess3At(c.lunch())},
+		LightDinner{start: c.departureLess3At(c.dinner())},
+		NoSnack{start: c.departureLess3At(c.dinner() + time.Hour), end: c.departureLess3At(c.sleep())},
+		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
+		HeavyLunch{start: c.departureLess2At(c.lunch())},
+		HeavyDinner{start: c.departureLess2At(c.dinner())},
+		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess2At(c.sleep())},
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(arrivalDinner)},
+		NoSnack{start: c.arrivalAt(arrivalDinner + time.Hour), end: c.arrivalAt(c.sleep())},
+
+		//Sleep
+		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(c.sleep())},
+		Sleep{start: c.arrivalAt(c.sleep()), end: c.arrivalPlus1At(c.wake())},
+
+		//Events
+		SetWatch{at: c.departureLess1At(c.lunch() + time.Hour)},
+		c.arrivalStep(),
+	}
+}
+
+func West12(c *Calculator) []Step {
+	return []Step{
+		//Caffeine
+
 	}
 }
 
