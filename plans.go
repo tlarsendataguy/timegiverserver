@@ -248,6 +248,33 @@ func West12(c *Calculator) []Step {
 	}
 }
 
+func West34(c *Calculator) []Step {
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess3At(c.wake()), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.departureLess1At(t0700)},
+		CaffeineOk{start: c.departureLess1At(t0700), end: c.departureLess1At(t1100)},
+		NoCaffeine{start: c.departureLess1At(t1100), end: c.departureAt(c.wake())},
+		Caffeine3C{start: c.departureAt(c.wake()), end: c.departureAt(t1100)},
+		NoCaffeine{start: c.departureAt(t1100), end: c.arrivalAt(c.sleep())},
+
+		//Meals
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		LightDinner{start: c.departureLess1At(c.dinner())},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
+
+		//Events
+		SetWatch{at: c.arrivalAt(c.breakfast())},
+		c.arrivalStep(),
+	}
+}
+
 func min(left, right time.Duration) time.Duration {
 	if left < right {
 		return left
