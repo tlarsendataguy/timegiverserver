@@ -114,6 +114,8 @@ func InitializeCalculator(inputs Inputs) *Calculator {
 		calc.calcPlan = West12
 	case -3, -4:
 		calc.calcPlan = West34
+	case -5, -6:
+		calc.calcPlan = West56
 	default:
 		panic(fmt.Sprintf(`invalid timezone shift %v`, timezones))
 	}
