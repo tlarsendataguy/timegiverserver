@@ -447,6 +447,53 @@ func West910(c *Calculator) []Step {
 	}
 }
 
+func Both1112(c *Calculator) []Step {
+	arrivalSleep := min(c.sleep(), t2200)
+
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess4At(c.wake()), end: c.departureLess4At(t1500)},
+		CaffeineOk{start: c.departureLess4At(t1500), end: c.departureLess4At(t1630)},
+		NoCaffeine{start: c.departureLess4At(t1630), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t0700)},
+		CaffeineOk{start: c.departureLess2At(t0700), end: c.departureLess2At(t1130)},
+		NoCaffeine{start: c.departureLess2At(t1130), end: c.departureLess1At(t0700)},
+		Caffeine3C{start: c.departureLess1At(t0700), end: c.departureLess1At(t1130)},
+		NoCaffeine{start: c.departureLess1At(t1130), end: c.arrivalAt(c.sleep())},
+
+		//Meals
+		HeavyBreakfast{start: c.departureLess4At(c.breakfast())},
+		HeavyLunch{start: c.departureLess4At(c.lunch())},
+		HeavyDinner{start: c.departureLess4At(c.dinner())},
+		LightBreakfast{start: c.departureLess3At(c.breakfast())},
+		LightLunch{start: c.departureLess3At(c.lunch())},
+		LightDinner{start: c.departureLess3At(c.dinner())},
+		NoSnack{start: c.departureLess3At(c.dinner() + oneHour), end: c.departureLess3At(c.sleep())},
+		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
+		HeavyLunch{start: c.departureLess2At(c.lunch())},
+		HeavyDinner{start: c.departureLess2At(c.dinner())},
+		NoSnack{start: c.departureLess2At(c.dinner() + oneHour), end: c.departureLess2At(c.sleep())},
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
+		NoSnack{start: c.arrivalAt(c.dinner() + oneHour), end: c.arrivalAt(c.sleep())},
+
+		//Sleep
+		Sleep{start: c.departureLess4At(c.sleep()), end: c.departureLess3At(c.wake())},
+		Sleep{start: c.departureLess3At(c.sleep()), end: c.departureLess2At(c.wake())},
+		Sleep{start: c.departureLess2At(c.sleep()), end: c.departureLess1At(c.wake())},
+		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(arrivalSleep)},
+		Sleep{c.arrivalAt(arrivalSleep), c.arrivalPlus1At(c.wake())},
+
+		//Events
+		SetWatch{at: c.departureLess1At(c.lunch() + oneHour)},
+		c.arrivalStep(),
+	}
+}
+
 func min(left, right time.Duration) time.Duration {
 	if left < right {
 		return left

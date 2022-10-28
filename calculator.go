@@ -120,8 +120,22 @@ func InitializeCalculator(inputs Inputs) *Calculator {
 		calc.calcPlan = West78
 	case -9, -10:
 		calc.calcPlan = West910
+	case -11, -12:
+		//If we are going westbound we need to adjust the pre-departure days
+		//up by 1 for the plan to be correct
+		if timezones < 0 && calc.departureAt(0).Before(calc.arrivalAt(0)) {
+			calc.Dates.DepartureLess4 = addDay(calc.Dates.DepartureLess4)
+			calc.Dates.DepartureLess3 = addDay(calc.Dates.DepartureLess3)
+			calc.Dates.DepartureLess2 = addDay(calc.Dates.DepartureLess2)
+			calc.Dates.DepartureLess1 = addDay(calc.Dates.DepartureLess1)
+		}
+		calc.calcPlan = Both1112
 	default:
 		panic(fmt.Sprintf(`invalid timezone shift %v`, timezones))
 	}
 	return calc
+}
+
+func addDay(value time.Time) time.Time {
+	return value.Add(time.Hour * 24)
 }
