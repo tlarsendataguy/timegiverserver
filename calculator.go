@@ -1,8 +1,10 @@
 package timegiverserver
 
 import (
+	"fmt"
 	"time"
 	"timegiverserver/base"
+	"timegiverserver/shift"
 )
 
 type Step interface {
@@ -95,7 +97,19 @@ func (c *Calculator) sleep() time.Duration {
 
 func InitializeCalculator(inputs Inputs) *Calculator {
 	calc := &Calculator{Routine: inputs.Routine}
-	calc.Dates = base.InitializeDates(inputs.Arrival, inputs.ArrivalOffset, inputs.DepartureOffset)
-
+	calc.Dates = base.InitializeDates(inputs.Arrival, inputs.DepartureOffset, inputs.ArrivalOffset)
+	timezones := shift.CalcTimezoneShift(inputs.DepartureOffset, inputs.ArrivalOffset)
+	switch timezones {
+	case 1, 2:
+		calc.calcPlan = East12
+	case 3, 4:
+		calc.calcPlan = East34
+	case 5, 6:
+		calc.calcPlan = East56
+	case 7, 8:
+		calc.calcPlan = East78
+	default:
+		panic(fmt.Sprintf(`invalid timezone shift %v`, timezones))
+	}
 	return calc
 }
