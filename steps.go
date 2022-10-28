@@ -29,6 +29,15 @@ func (s Caffeine3C) ToIcs(lang string) string {
 	return ``
 }
 
+type Caffeine2C struct {
+	start time.Time
+	end   time.Time
+}
+
+func (s Caffeine2C) ToIcs(lang string) string {
+	return ``
+}
+
 type LightBreakfast struct {
 	start time.Time
 }
@@ -50,6 +59,14 @@ type LightDinner struct {
 }
 
 func (s LightDinner) ToIcs(lang string) string {
+	return ``
+}
+
+type LightDinnerOptional struct {
+	start time.Time
+}
+
+func (s LightDinnerOptional) ToIcs(lang string) string {
 	return ``
 }
 
