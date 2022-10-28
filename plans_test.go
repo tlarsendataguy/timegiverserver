@@ -11,48 +11,48 @@ var routine = DailyRoutine{Wake: time.Hour * 6, Breakfast: time.Hour * 7, Lunch:
 
 func TestEast12(t *testing.T) {
 	plan := generatePlan(0, 2)
-	if err := checkNoCaffeine(t, plan[0], `2017-01-13 06:00`, `2017-01-13 15:00`); err != nil {
+	if err := checkNoCaffeine(plan[0], `2017-01-13 06:00`, `2017-01-13 15:00`); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := checkCaffeineOk(t, plan[1], `2017-01-13 15:00`, `2017-01-13 16:30`); err != nil {
+	if err := checkCaffeineOk(plan[1], `2017-01-13 15:00`, `2017-01-13 16:30`); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := checkNoCaffeine(t, plan[2], `2017-01-13 16:30`, `2017-01-14 18:00`); err != nil {
+	if err := checkNoCaffeine(plan[2], `2017-01-13 16:30`, `2017-01-14 18:00`); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := checkCaffeine3C(t, plan[3], `2017-01-14 18:00`, `2017-01-14 19:00`); err != nil {
+	if err := checkCaffeine3C(plan[3], `2017-01-14 18:00`, `2017-01-14 19:00`); err != nil {
 		t.Fatal(err.Error())
 	}
-	if err := checkNoCaffeine(t, plan[4], `2017-01-14 19:00`, `2017-01-15 22:00`); err != nil {
+	if err := checkNoCaffeine(plan[4], `2017-01-14 19:00`, `2017-01-15 22:00`); err != nil {
 		t.Fatal(err.Error())
 	}
 }
 
-func checkNoCaffeine(t *testing.T, item interface{}, start, end string) error {
+func checkNoCaffeine(item interface{}, start, end string) error {
 	step, ok := item.(NoCaffeine)
 	if !ok {
 		return fmt.Errorf(`expected NoCaffeine but got %T`, item)
 	}
-	return checkDateRange(t, start, end, step.start, step.end)
+	return checkDateRange(start, end, step.start, step.end)
 }
 
-func checkCaffeineOk(t *testing.T, item interface{}, start, end string) error {
+func checkCaffeineOk(item interface{}, start, end string) error {
 	step, ok := item.(CaffeineOk)
 	if !ok {
-		t.Fatalf(`expected CaffeineOk but got %T`, item)
+		return fmt.Errorf(`expected CaffeineOk but got %T`, item)
 	}
-	return checkDateRange(t, start, end, step.start, step.end)
+	return checkDateRange(start, end, step.start, step.end)
 }
 
-func checkCaffeine3C(t *testing.T, item interface{}, start, end string) error {
+func checkCaffeine3C(item interface{}, start, end string) error {
 	step, ok := item.(Caffeine3C)
 	if !ok {
-		t.Fatalf(`expected Caffeine3C but got %T`, item)
+		return fmt.Errorf(`expected Caffeine3C but got %T`, item)
 	}
-	return checkDateRange(t, start, end, step.start, step.end)
+	return checkDateRange(start, end, step.start, step.end)
 }
 
-func checkDateRange(t *testing.T, expectedStart, expectedEnd string, actualStart, actualEnd time.Time) error {
+func checkDateRange(expectedStart, expectedEnd string, actualStart, actualEnd time.Time) error {
 	if !at(actualStart, expectedStart) || !at(actualEnd, expectedEnd) {
 		return fmt.Errorf(`expected from %v to %v but got %v to %v`, expectedStart, expectedEnd, actualStart, actualEnd)
 	}
