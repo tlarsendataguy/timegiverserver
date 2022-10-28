@@ -39,7 +39,7 @@ func (s Caffeine2C) ToIcs(lang string) string {
 }
 
 type LightBreakfast struct {
-	start time.Time
+	at time.Time
 }
 
 func (s LightBreakfast) ToIcs(lang string) string {
@@ -47,7 +47,7 @@ func (s LightBreakfast) ToIcs(lang string) string {
 }
 
 type LightLunch struct {
-	start time.Time
+	at time.Time
 }
 
 func (s LightLunch) ToIcs(lang string) string {
@@ -55,7 +55,7 @@ func (s LightLunch) ToIcs(lang string) string {
 }
 
 type LightDinner struct {
-	start time.Time
+	at time.Time
 }
 
 func (s LightDinner) ToIcs(lang string) string {
@@ -63,7 +63,7 @@ func (s LightDinner) ToIcs(lang string) string {
 }
 
 type LightDinnerOptional struct {
-	start time.Time
+	at time.Time
 }
 
 func (s LightDinnerOptional) ToIcs(lang string) string {
@@ -71,7 +71,7 @@ func (s LightDinnerOptional) ToIcs(lang string) string {
 }
 
 type HeavyBreakfast struct {
-	start time.Time
+	at time.Time
 }
 
 func (s HeavyBreakfast) ToIcs(lang string) string {
@@ -79,7 +79,7 @@ func (s HeavyBreakfast) ToIcs(lang string) string {
 }
 
 type HeavyLunch struct {
-	start time.Time
+	at time.Time
 }
 
 func (s HeavyLunch) ToIcs(lang string) string {
@@ -87,7 +87,7 @@ func (s HeavyLunch) ToIcs(lang string) string {
 }
 
 type HeavyDinner struct {
-	start time.Time
+	at time.Time
 }
 
 func (s HeavyDinner) ToIcs(lang string) string {
