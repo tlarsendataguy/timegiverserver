@@ -7,7 +7,7 @@ type NoCaffeine struct {
 	end   time.Time
 }
 
-func (s NoCaffeine) ToIcs() string {
+func (s NoCaffeine) ToIcs(lang string) string {
 	return ``
 }
 
@@ -16,7 +16,7 @@ type CaffeineOk struct {
 	end   time.Time
 }
 
-func (s CaffeineOk) ToIcs() string {
+func (s CaffeineOk) ToIcs(lang string) string {
 	return ``
 }
 
@@ -25,7 +25,7 @@ type Caffeine3C struct {
 	end   time.Time
 }
 
-func (s Caffeine3C) ToIcs() string {
+func (s Caffeine3C) ToIcs(lang string) string {
 	return ``
 }
 
@@ -33,7 +33,7 @@ type LightBreakfast struct {
 	start time.Time
 }
 
-func (s LightBreakfast) ToIcs() string {
+func (s LightBreakfast) ToIcs(lang string) string {
 	return ``
 }
 
@@ -41,7 +41,7 @@ type LightLunch struct {
 	start time.Time
 }
 
-func (s LightLunch) ToIcs() string {
+func (s LightLunch) ToIcs(lang string) string {
 	return ``
 }
 
@@ -49,7 +49,7 @@ type LightDinner struct {
 	start time.Time
 }
 
-func (s LightDinner) ToIcs() string {
+func (s LightDinner) ToIcs(lang string) string {
 	return ``
 }
 
@@ -57,7 +57,7 @@ type HeavyBreakfast struct {
 	start time.Time
 }
 
-func (s HeavyBreakfast) ToIcs() string {
+func (s HeavyBreakfast) ToIcs(lang string) string {
 	return ``
 }
 
@@ -65,7 +65,7 @@ type HeavyLunch struct {
 	start time.Time
 }
 
-func (s HeavyLunch) ToIcs() string {
+func (s HeavyLunch) ToIcs(lang string) string {
 	return ``
 }
 
@@ -73,7 +73,16 @@ type HeavyDinner struct {
 	start time.Time
 }
 
-func (s HeavyDinner) ToIcs() string {
+func (s HeavyDinner) ToIcs(lang string) string {
+	return ``
+}
+
+type NoSnack struct {
+	start time.Time
+	end   time.Time
+}
+
+func (s NoSnack) ToIcs(lang string) string {
 	return ``
 }
 
@@ -82,7 +91,16 @@ type Sleep struct {
 	end   time.Time
 }
 
-func (s Sleep) ToIcs() string {
+func (s Sleep) ToIcs(lang string) string {
+	return ``
+}
+
+type NoNap struct {
+	start time.Time
+	end   time.Time
+}
+
+func (s NoNap) ToIcs(lang string) string {
 	return ``
 }
 
@@ -90,7 +108,7 @@ type SetWatch struct {
 	at time.Time
 }
 
-func (s SetWatch) ToIcs() string {
+func (s SetWatch) ToIcs(lang string) string {
 	return ``
 }
 
@@ -98,6 +116,6 @@ type Arrive struct {
 	at time.Time
 }
 
-func (s Arrive) ToIcs() string {
+func (s Arrive) ToIcs(lang string) string {
 	return ``
 }

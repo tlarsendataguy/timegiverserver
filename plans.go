@@ -17,26 +17,127 @@ const t2400 = time.Hour * 24
 func East12(c *Calculator) []Step {
 	return []Step{
 		//Caffeine
-		NoCaffeine{start: c.Dates.DepartureLess2.Add(c.Routine.Wake), end: c.Dates.DepartureLess2.Add(t1500)},
-		CaffeineOk{start: c.Dates.DepartureLess2.Add(t1500), end: c.Dates.DepartureLess2.Add(t1630)},
-		NoCaffeine{start: c.Dates.DepartureLess2.Add(t1630), end: c.Dates.DepartureLess1.Add(t1800)},
-		Caffeine3C{start: c.Dates.DepartureLess1.Add(t1800), end: c.Dates.DepartureLess1.Add(t1900)},
-		NoCaffeine{start: c.Dates.DepartureLess1.Add(t1900), end: c.Dates.Arrival.Add(t2400)},
+		NoCaffeine{start: c.departureLess2At(c.wake()), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.departureLess1At(t1800)},
+		Caffeine3C{start: c.departureLess1At(t1800), end: c.departureLess1At(t1900)},
+		NoCaffeine{start: c.departureLess1At(t1900), end: c.arrivalAt(t2400)},
 
 		//Meals
-		LightBreakfast{start: c.Dates.DepartureLess1.Add(c.Routine.Breakfast)},
-		LightLunch{start: c.Dates.DepartureLess1.Add(c.Routine.Lunch)},
-		LightDinner{start: c.Dates.DepartureLess1.Add(c.Routine.Dinner)},
-		HeavyBreakfast{start: c.Dates.Arrival.Add(c.Routine.Breakfast)},
-		HeavyLunch{start: c.Dates.Arrival.Add(c.Routine.Lunch)},
-		HeavyDinner{start: c.Dates.Arrival.Add(c.Routine.Dinner)},
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		LightDinner{start: c.departureLess1At(c.dinner())},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
 
 		//Sleep
-		Sleep{start: c.Dates.DepartureLess1.Add(c.Routine.Sleep), end: c.Dates.Arrival.Add(c.Routine.Wake)},
-		Sleep{start: c.Dates.Arrival.Add(c.Routine.Sleep), end: c.Dates.ArrivalPlus1.Add(c.Routine.Wake)},
+		Sleep{start: c.departureLess1At(c.sleep()), end: c.arrivalAt(c.wake())},
+		Sleep{start: c.arrivalAt(c.sleep()), end: c.arrivalPlus1At(c.wake())},
 
 		//Events
-		SetWatch{at: c.Dates.Arrival.Add(c.Routine.Breakfast)},
-		Arrive{at: c.Dates.ArriveAt},
+		SetWatch{at: c.arrivalAt(c.breakfast())},
+		c.arrivalStep(),
 	}
+}
+
+func East34(c *Calculator) []Step {
+	pre1Dinner := min(c.dinner(), t1800)
+	pre1Sleep := max(pre1Dinner+time.Hour, t1800)
+	arrivalSleep := min(c.sleep(), t2230)
+
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess4At(c.wake()), end: c.departureLess4At(t1500)},
+		CaffeineOk{start: c.departureLess4At(t1500), end: c.departureLess4At(t1630)},
+		NoCaffeine{start: c.departureLess4At(t1630), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.departureLess1At(t1800)},
+		Caffeine3C{start: c.departureLess1At(t1800), end: c.departureLess1At(t1900)},
+		NoCaffeine{start: c.departureLess1At(t1900), end: c.arrivalAt(t2400)},
+
+		//Meals
+		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
+		HeavyLunch{start: c.departureLess2At(c.lunch())},
+		HeavyDinner{start: c.departureLess2At(c.dinner())},
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		LightDinner{start: c.departureLess1At(pre1Dinner)},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
+
+		//Sleep
+		Sleep{start: c.departureLess1At(pre1Sleep), end: c.arrivalAt(c.wake())},
+		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(c.sleep())},
+		Sleep{start: c.arrivalAt(arrivalSleep), end: c.arrivalPlus1At(c.wake())},
+
+		//Events
+		SetWatch{at: c.departureLess1At(t1800)},
+		c.arrivalStep(),
+	}
+}
+
+func East56(c *Calculator) []Step {
+	pre1Dinner := min(c.dinner(), t1800)
+	pre1Sleep := max(pre1Dinner+time.Hour, t1800)
+	arrivalSleep := min(c.sleep(), t2200)
+
+	return []Step{
+		//Caffeine
+		NoCaffeine{start: c.departureLess4At(c.wake()), end: c.departureLess4At(t1500)},
+		CaffeineOk{start: c.departureLess4At(t1500), end: c.departureLess4At(t1630)},
+		NoCaffeine{start: c.departureLess4At(t1630), end: c.departureLess3At(t1500)},
+		CaffeineOk{start: c.departureLess3At(t1500), end: c.departureLess3At(t1630)},
+		NoCaffeine{start: c.departureLess3At(t1630), end: c.departureLess2At(t1500)},
+		CaffeineOk{start: c.departureLess2At(t1500), end: c.departureLess2At(t1630)},
+		NoCaffeine{start: c.departureLess2At(t1630), end: c.departureLess1At(t1800)},
+		Caffeine3C{start: c.departureLess1At(t1800), end: c.departureLess1At(t1900)},
+		NoCaffeine{start: c.departureLess1At(t1900), end: c.arrivalAt(t2400)},
+
+		//Meals
+		HeavyBreakfast{start: c.departureLess4At(c.breakfast())},
+		HeavyLunch{start: c.departureLess4At(c.lunch())},
+		HeavyDinner{start: c.departureLess4At(c.dinner())},
+		LightBreakfast{start: c.departureLess3At(c.breakfast())},
+		LightLunch{start: c.departureLess3At(c.lunch())},
+		LightDinner{start: c.departureLess3At(c.dinner())},
+		NoSnack{start: c.departureLess3At(c.dinner() + time.Hour), end: c.departureLess3At(c.sleep())},
+		HeavyBreakfast{start: c.departureLess2At(c.breakfast())},
+		HeavyLunch{start: c.departureLess2At(c.lunch())},
+		HeavyDinner{start: c.departureLess2At(c.dinner())},
+		NoSnack{start: c.departureLess2At(c.dinner() + time.Hour), end: c.departureLess3At(c.sleep())},
+		LightBreakfast{start: c.departureLess1At(c.breakfast())},
+		LightLunch{start: c.departureLess1At(c.lunch())},
+		LightDinner{start: c.departureLess1At(pre1Dinner)},
+		HeavyBreakfast{start: c.arrivalAt(c.breakfast())},
+		HeavyLunch{start: c.arrivalAt(c.lunch())},
+		HeavyDinner{start: c.arrivalAt(c.dinner())},
+		NoSnack{start: c.arrivalAt(c.dinner() + time.Hour), end: c.arrivalAt(c.sleep())},
+
+		//Sleep
+		Sleep{start: c.departureLess1At(pre1Sleep), end: c.arrivalAt(c.wake())},
+		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(arrivalSleep)},
+		Sleep{start: c.arrivalAt(arrivalSleep), end: c.arrivalPlus1At(c.wake())},
+
+		//Events
+		SetWatch{at: c.departureLess1At(t1800)},
+		c.arrivalStep(),
+	}
+}
+
+func min(left, right time.Duration) time.Duration {
+	if left < right {
+		return left
+	}
+	return right
+}
+
+func max(left, right time.Duration) time.Duration {
+	if left > right {
+		return left
+	}
+	return right
 }

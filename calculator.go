@@ -6,7 +6,23 @@ import (
 )
 
 type Step interface {
-	ToIcs() string
+	ToIcs(lang string) string
+}
+
+type DailyRoutine struct {
+	Wake      time.Duration
+	Breakfast time.Duration
+	Lunch     time.Duration
+	Dinner    time.Duration
+	Sleep     time.Duration
+}
+
+type Inputs struct {
+	Language        string
+	Arrival         time.Time
+	DepartureOffset float64
+	ArrivalOffset   float64
+	Routine         DailyRoutine
 }
 
 type CalcPlan func(*Calculator) []Step
@@ -21,19 +37,60 @@ func (c *Calculator) Plan() []Step {
 	return c.calcPlan(c)
 }
 
-type DailyRoutine struct {
-	Wake      time.Duration
-	Breakfast time.Duration
-	Lunch     time.Duration
-	Dinner    time.Duration
-	Sleep     time.Duration
+func (c *Calculator) arrivalStep() Step {
+	return Arrive{at: c.Dates.ArriveAt}
 }
 
-type Inputs struct {
-	Arrival         time.Time
-	DepartureOffset float64
-	ArrivalOffset   float64
-	Routine         DailyRoutine
+func (c *Calculator) arrivalAt(t time.Duration) time.Time {
+	return c.Dates.Arrival.Add(t)
+}
+
+func (c *Calculator) arrivalLess1At(t time.Duration) time.Time {
+	return c.Dates.ArrivalLess1.Add(t)
+}
+
+func (c *Calculator) arrivalPlus1At(t time.Duration) time.Time {
+	return c.Dates.ArrivalPlus1.Add(t)
+}
+
+func (c *Calculator) departureAt(t time.Duration) time.Time {
+	return c.Dates.Departure.Add(t)
+}
+
+func (c *Calculator) departureLess1At(t time.Duration) time.Time {
+	return c.Dates.DepartureLess1.Add(t)
+}
+
+func (c *Calculator) departureLess2At(t time.Duration) time.Time {
+	return c.Dates.DepartureLess2.Add(t)
+}
+
+func (c *Calculator) departureLess3At(t time.Duration) time.Time {
+	return c.Dates.DepartureLess3.Add(t)
+}
+
+func (c *Calculator) departureLess4At(t time.Duration) time.Time {
+	return c.Dates.DepartureLess4.Add(t)
+}
+
+func (c *Calculator) wake() time.Duration {
+	return c.Routine.Wake
+}
+
+func (c *Calculator) breakfast() time.Duration {
+	return c.Routine.Breakfast
+}
+
+func (c *Calculator) lunch() time.Duration {
+	return c.Routine.Lunch
+}
+
+func (c *Calculator) dinner() time.Duration {
+	return c.Routine.Dinner
+}
+
+func (c *Calculator) sleep() time.Duration {
+	return c.Routine.Sleep
 }
 
 func InitializeCalculator(inputs Inputs) *Calculator {
