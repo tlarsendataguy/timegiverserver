@@ -29,4 +29,10 @@ func TestLocCompleteness(t *testing.T) {
 	if qty := len(LightDinnerOptional); qty != expectedQty {
 		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
+	if qty := len(HeavyBreakfast); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(HeavyLunch); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
 }

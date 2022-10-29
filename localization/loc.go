@@ -114,3 +114,27 @@ var LightDinnerOptional = []StepText{
 	{`Съешьте легкий ужин`, `Съешьте легкий богатый углеводами ужин. Это не обязательно, но если хотите поесть, в ужине должно быть 300-400 калорий.`},
 	{`吃简便晚餐`, `吃一顿简便、富含碳水化合物的晚餐。这顿饭可吃可不吃，但如果吃，其热量应介于300至400卡路里之间。`},
 }
+
+var HeavyBreakfast = []StepText{
+	{`Esse ein großes Frühstück`, `Iss ein herzhaftes, proteinreiches Frühstück.`},
+	{`Eat a large breakfast`, `Eat a hearty, high-protein breakfast.`},
+	{`Come un desayuno abundante`, `Come un desayuno abundante y alto en proteínas.`},
+	{`Mangez un petit déjeuner consistant`, `Mangez un petit déjeuner consistant et riche en protéines.`},
+	{`सुबह का नाश्ता बड़ा करें`, `अच्छा, उच्च प्रोटीन युक्त नाश्ता करें।`},
+	{`朝食をたくさん食べる`, `タンパク質が多く含まれた朝食をたっぷり食べましょう。`},
+	{`Coma um café da manhã grande`, `Coma um café da manhã saudável, rico em proteínas.`},
+	{`Съешьте плотный завтрак`, `Съешьте плотный богатый белком завтрак.`},
+	{`吃丰盛早餐`, `吃一顿丰盛、富含蛋白质的早餐。`},
+}
+
+var HeavyLunch = []StepText{
+	{`Esse ein großes Mittagessen`, `Iss ein herzhaftes, proteinreiches Mittagessen.`},
+	{`Eat a large lunch`, `Eat a hearty, high-protein lunch.`},
+	{`Come un almuerzo abundante`, `Come un almuerzo abundante y alto en proteínas.`},
+	{`Mangez un déjeuner consistant`, `Mangez un déjeuner consistant et riche en protéines.`},
+	{`दिन का खाना बड़ा करें`, `अच्छा, उच्च प्रोटीन युक्त लंच करें।`},
+	{`昼食をたくさん食べる`, `タンパク質が多く含まれた昼食をたっぷり食べましょう。`},
+	{`Coma um almoço grande`, `Coma um almoço saudável, rico em proteínas.`},
+	{`Съешьте плотный обед`, `Съешьте плотный богатый белком обед.`},
+	{`吃丰盛午餐`, `吃一顿丰盛、富含蛋白质的午餐。`},
+}
