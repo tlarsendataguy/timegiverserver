@@ -1,27 +1,32 @@
 package localization
 
-import (
-	"testing"
-)
+import "testing"
 
-func TestStopCaffeine(t *testing.T) {
-	value := StopCaffeine[JA]
-	if value.Title != `カフェインなし` {
-		t.Fatalf(`expected 'カフェインなし' but got '%v'`, value.Title)
-	}
-}
+func TestLocCompleteness(t *testing.T) {
+	expectedQty := 9
 
-func TestCaffeineOk(t *testing.T) {
-	value := CaffeineOk[DE]
-	if value.Title != `Koffein Ok` {
-		t.Fatalf(`expected 'Koffein Ok' but got '%v'`, value.Title)
+	if qty := len(NoCaffeine); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
-}
-
-func TestCaffeine12(t *testing.T) {
-	value := Caffeine12[EN]
-	if value.Title != `Drink a caffeinated beverage` {
-		t.Fatalf(`expected 'Drink a caffeinated beverage' but got '%v'`, value.Title)
+	if qty := len(Caffeine2C); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
-	t.Log(value.Description)
+	if qty := len(Caffeine3C); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(CaffeineOk); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(LightBreakfast); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(LightLunch); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(LightDinner); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
+	if qty := len(LightDinnerOptional); qty != expectedQty {
+		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
+	}
 }

@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"time"
 	"timegiverserver/base"
+	"timegiverserver/localization"
 	"timegiverserver/shift"
 )
 
 type Step interface {
-	ToIcs(lang string) string
+	ToIcs(lang localization.Lang) string
 }
 
 type DailyRoutine struct {
