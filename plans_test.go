@@ -579,6 +579,112 @@ func TestEast11(t *testing.T) {
 	}
 }
 
+func TestWest11(t *testing.T) {
+	plan := generatePlan(0, -11)
+	if err := checkNoCaffeine(plan[0], `2017-01-12 06:00`, `2017-01-12 15:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[1], `2017-01-12 15:00`, `2017-01-12 16:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[2], `2017-01-12 16:30`, `2017-01-13 15:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[3], `2017-01-13 15:00`, `2017-01-13 16:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[4], `2017-01-13 16:30`, `2017-01-14 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[5], `2017-01-14 07:00`, `2017-01-14 11:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[6], `2017-01-14 11:30`, `2017-01-15 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeine3C(plan[7], `2017-01-15 07:00`, `2017-01-15 11:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[8], `2017-01-15 11:30`, `2017-01-16 09:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyBreakfast(plan[9], `2017-01-12 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyLunch(plan[10], `2017-01-12 12:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyDinner(plan[11], `2017-01-12 17:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightBreakfast(plan[12], `2017-01-13 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightLunch(plan[13], `2017-01-13 12:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightDinner(plan[14], `2017-01-13 17:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoSnack(plan[15], `2017-01-13 18:00`, `2017-01-13 22:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyBreakfast(plan[16], `2017-01-14 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyLunch(plan[17], `2017-01-14 12:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyDinner(plan[18], `2017-01-14 17:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoSnack(plan[19], `2017-01-14 18:00`, `2017-01-14 22:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightBreakfast(plan[20], `2017-01-15 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightLunch(plan[21], `2017-01-15 12:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyBreakfast(plan[22], `2017-01-15 18:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyLunch(plan[23], `2017-01-15 23:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkHeavyDinner(plan[24], `2017-01-16 04:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoSnack(plan[25], `2017-01-16 05:00`, `2017-01-16 09:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSleep(plan[26], `2017-01-12 22:00`, `2017-01-13 06:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSleep(plan[27], `2017-01-13 22:00`, `2017-01-14 06:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSleep(plan[28], `2017-01-14 22:00`, `2017-01-15 06:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSleep(plan[29], `2017-01-15 13:00`, `2017-01-15 17:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoNap(plan[30], `2017-01-15 17:00`, `2017-01-16 09:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSleep(plan[31], `2017-01-16 09:00`, `2017-01-16 17:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkSetWatch(plan[32], `2017-01-15 13:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkArrive(plan[33], `2017-01-15 23:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
 func checkNoCaffeine(item interface{}, start, end string) error {
 	step, ok := item.(NoCaffeine)
 	if !ok {
