@@ -235,6 +235,7 @@ func East910(c *Calculator) []Step {
 		Sleep{start: c.departureLess4At(c.sleep()), end: c.departureLess3At(c.wake())},
 		Sleep{start: c.departureLess3At(c.sleep()), end: c.departureLess2At(c.wake())},
 		Sleep{start: c.departureLess2At(c.sleep()), end: c.departureLess1At(c.wake())},
+		Sleep{start: c.departureLess1At(c.lunch() + oneHour), end: c.arrivalAt(c.wake())},
 		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(c.sleep())},
 		Sleep{start: c.arrivalAt(c.sleep()), end: c.arrivalPlus1At(c.wake())},
 
@@ -485,6 +486,7 @@ func Both1112(c *Calculator) []Step {
 		Sleep{start: c.departureLess4At(c.sleep()), end: c.departureLess3At(c.wake())},
 		Sleep{start: c.departureLess3At(c.sleep()), end: c.departureLess2At(c.wake())},
 		Sleep{start: c.departureLess2At(c.sleep()), end: c.departureLess1At(c.wake())},
+		Sleep{start: c.departureLess1At(c.lunch() + oneHour), end: c.arrivalAt(c.wake())},
 		NoNap{start: c.arrivalAt(c.wake()), end: c.arrivalAt(arrivalSleep)},
 		Sleep{c.arrivalAt(arrivalSleep), c.arrivalPlus1At(c.wake())},
 
