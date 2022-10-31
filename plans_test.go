@@ -685,6 +685,80 @@ func TestWest11(t *testing.T) {
 	}
 }
 
+func TestWest12(t *testing.T) {
+	plan := generatePlan(0, -2)
+	err := checkNoCaffeine(plan[0], `2017-01-13 06:00`, `2017-01-13 15:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkCaffeineOk(plan[1], `2017-01-13 15:00`, `2017-01-13 16:30`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkNoCaffeine(plan[2], `2017-01-13 16:30`, `2017-01-14 07:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkCaffeineOk(plan[3], `2017-01-14 07:00`, `2017-01-14 11:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkNoCaffeine(plan[4], `2017-01-14 11:00`, `2017-01-15 06:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkCaffeine3C(plan[5], `2017-01-15 06:00`, `2017-01-15 11:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkNoCaffeine(plan[6], `2017-01-15 11:00`, `2017-01-16 00:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkLightBreakfast(plan[7], `2017-01-14 07:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkLightLunch(plan[8], `2017-01-14 12:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkLightDinner(plan[9], `2017-01-14 17:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkHeavyBreakfast(plan[10], `2017-01-15 09:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkHeavyLunch(plan[11], `2017-01-15 14:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkHeavyDinner(plan[12], `2017-01-15 19:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkSleep(plan[13], `2017-01-13 22:00`, `2017-01-14 06:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkSleep(plan[14], `2017-01-14 22:00`, `2017-01-15 06:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	err = checkSleep(plan[15], `2017-01-16 00:00`, `2017-01-16 08:00`)
+	if err != nil {
+		t.Fatal(err.Error())
+	}
+	if err = checkSetWatch(plan[16], `2017-01-15 09:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err = checkArrive(plan[17], `2017-01-15 14:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
 func checkNoCaffeine(item interface{}, start, end string) error {
 	step, ok := item.(NoCaffeine)
 	if !ok {
