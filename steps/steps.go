@@ -1,13 +1,45 @@
-package timegiverserver
+package steps
 
 import (
+	"strings"
 	"time"
-	"timegiverserver/localization"
+	"timegiverserver/steps/localization"
 )
 
+func FmtDt(value time.Time) string {
+	return value.Format(`20060102T150400Z`)
+}
+
+func Wrap(header, content string) string {
+	builder := strings.Builder{}
+	toWrite := append([]byte(header), []byte(content)...)
+	size := len(toWrite)
+	position := 0
+	remainder := size
+
+	for remainder > 0 {
+		amount := min(remainder, 75)
+		builder.Write(toWrite[position : position+amount])
+		if remainder > 75 {
+			builder.Write([]byte("\r\n "))
+		}
+		position += amount
+		remainder -= amount
+	}
+
+	return builder.String()
+}
+
+func min(left, right int) int {
+	if left < right {
+		return left
+	}
+	return right
+}
+
 type NoCaffeine struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s NoCaffeine) ToIcs(lang localization.Lang) string {
@@ -15,8 +47,8 @@ func (s NoCaffeine) ToIcs(lang localization.Lang) string {
 }
 
 type CaffeineOk struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s CaffeineOk) ToIcs(lang localization.Lang) string {
@@ -24,8 +56,8 @@ func (s CaffeineOk) ToIcs(lang localization.Lang) string {
 }
 
 type Caffeine3C struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s Caffeine3C) ToIcs(lang localization.Lang) string {
@@ -33,8 +65,8 @@ func (s Caffeine3C) ToIcs(lang localization.Lang) string {
 }
 
 type Caffeine2C struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s Caffeine2C) ToIcs(lang localization.Lang) string {
@@ -42,7 +74,7 @@ func (s Caffeine2C) ToIcs(lang localization.Lang) string {
 }
 
 type LightBreakfast struct {
-	at time.Time
+	At time.Time
 }
 
 func (s LightBreakfast) ToIcs(lang localization.Lang) string {
@@ -50,7 +82,7 @@ func (s LightBreakfast) ToIcs(lang localization.Lang) string {
 }
 
 type LightLunch struct {
-	at time.Time
+	At time.Time
 }
 
 func (s LightLunch) ToIcs(lang localization.Lang) string {
@@ -58,7 +90,7 @@ func (s LightLunch) ToIcs(lang localization.Lang) string {
 }
 
 type LightDinner struct {
-	at time.Time
+	At time.Time
 }
 
 func (s LightDinner) ToIcs(lang localization.Lang) string {
@@ -66,7 +98,7 @@ func (s LightDinner) ToIcs(lang localization.Lang) string {
 }
 
 type LightDinnerOptional struct {
-	at time.Time
+	At time.Time
 }
 
 func (s LightDinnerOptional) ToIcs(lang localization.Lang) string {
@@ -74,7 +106,7 @@ func (s LightDinnerOptional) ToIcs(lang localization.Lang) string {
 }
 
 type HeavyBreakfast struct {
-	at time.Time
+	At time.Time
 }
 
 func (s HeavyBreakfast) ToIcs(lang localization.Lang) string {
@@ -82,7 +114,7 @@ func (s HeavyBreakfast) ToIcs(lang localization.Lang) string {
 }
 
 type HeavyLunch struct {
-	at time.Time
+	At time.Time
 }
 
 func (s HeavyLunch) ToIcs(lang localization.Lang) string {
@@ -90,7 +122,7 @@ func (s HeavyLunch) ToIcs(lang localization.Lang) string {
 }
 
 type HeavyDinner struct {
-	at time.Time
+	At time.Time
 }
 
 func (s HeavyDinner) ToIcs(lang localization.Lang) string {
@@ -98,8 +130,8 @@ func (s HeavyDinner) ToIcs(lang localization.Lang) string {
 }
 
 type NoSnack struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s NoSnack) ToIcs(lang localization.Lang) string {
@@ -107,8 +139,8 @@ func (s NoSnack) ToIcs(lang localization.Lang) string {
 }
 
 type Sleep struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s Sleep) ToIcs(lang localization.Lang) string {
@@ -116,8 +148,8 @@ func (s Sleep) ToIcs(lang localization.Lang) string {
 }
 
 type NoNap struct {
-	start time.Time
-	end   time.Time
+	Start time.Time
+	End   time.Time
 }
 
 func (s NoNap) ToIcs(lang localization.Lang) string {
@@ -125,7 +157,7 @@ func (s NoNap) ToIcs(lang localization.Lang) string {
 }
 
 type SetWatch struct {
-	at time.Time
+	At time.Time
 }
 
 func (s SetWatch) ToIcs(lang localization.Lang) string {
@@ -133,7 +165,7 @@ func (s SetWatch) ToIcs(lang localization.Lang) string {
 }
 
 type Arrive struct {
-	at time.Time
+	At time.Time
 }
 
 func (s Arrive) ToIcs(lang localization.Lang) string {

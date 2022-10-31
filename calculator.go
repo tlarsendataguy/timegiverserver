@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"time"
 	"timegiverserver/base"
-	"timegiverserver/localization"
 	"timegiverserver/shift"
+	"timegiverserver/steps"
+	"timegiverserver/steps/localization"
 )
 
 type Step interface {
@@ -41,7 +42,7 @@ func (c *Calculator) Plan() []Step {
 }
 
 func (c *Calculator) arrivalStep() Step {
-	return Arrive{at: c.Dates.ArriveAt}
+	return steps.Arrive{At: c.Dates.ArriveAt}
 }
 
 func (c *Calculator) arrivalAt(t time.Duration) time.Time {

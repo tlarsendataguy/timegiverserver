@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"testing"
 	"time"
+	"timegiverserver/steps"
 )
 
 var arrival = time.Date(2017, 1, 15, 12, 0, 0, 0, time.UTC)
@@ -760,131 +761,131 @@ func TestWest12(t *testing.T) {
 }
 
 func checkNoCaffeine(item interface{}, start, end string) error {
-	step, ok := item.(NoCaffeine)
+	step, ok := item.(steps.NoCaffeine)
 	if !ok {
 		return fmt.Errorf(`expected NoCaffeine but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkCaffeineOk(item interface{}, start, end string) error {
-	step, ok := item.(CaffeineOk)
+	step, ok := item.(steps.CaffeineOk)
 	if !ok {
 		return fmt.Errorf(`expected CaffeineOk but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkCaffeine2C(item interface{}, start, end string) error {
-	step, ok := item.(Caffeine2C)
+	step, ok := item.(steps.Caffeine2C)
 	if !ok {
 		return fmt.Errorf(`expected Caffeine2C but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkCaffeine3C(item interface{}, start, end string) error {
-	step, ok := item.(Caffeine3C)
+	step, ok := item.(steps.Caffeine3C)
 	if !ok {
 		return fmt.Errorf(`expected Caffeine3C but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkLightBreakfast(item interface{}, at string) error {
-	step, ok := item.(LightBreakfast)
+	step, ok := item.(steps.LightBreakfast)
 	if !ok {
 		return fmt.Errorf(`expected LightBreakfast but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkLightLunch(item interface{}, at string) error {
-	step, ok := item.(LightLunch)
+	step, ok := item.(steps.LightLunch)
 	if !ok {
 		return fmt.Errorf(`expected LightLunch but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkLightDinner(item interface{}, at string) error {
-	step, ok := item.(LightDinner)
+	step, ok := item.(steps.LightDinner)
 	if !ok {
 		return fmt.Errorf(`expected LightDinner but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkLightDinnerOptional(item interface{}, at string) error {
-	step, ok := item.(LightDinnerOptional)
+	step, ok := item.(steps.LightDinnerOptional)
 	if !ok {
 		return fmt.Errorf(`expected LightDinnerOptionall but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkHeavyBreakfast(item interface{}, at string) error {
-	step, ok := item.(HeavyBreakfast)
+	step, ok := item.(steps.HeavyBreakfast)
 	if !ok {
 		return fmt.Errorf(`expected HeavyBreakfast but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkHeavyLunch(item interface{}, at string) error {
-	step, ok := item.(HeavyLunch)
+	step, ok := item.(steps.HeavyLunch)
 	if !ok {
 		return fmt.Errorf(`expected HeavyLunch but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkHeavyDinner(item interface{}, at string) error {
-	step, ok := item.(HeavyDinner)
+	step, ok := item.(steps.HeavyDinner)
 	if !ok {
 		return fmt.Errorf(`expected HeavyDinner but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkNoSnack(item interface{}, start, end string) error {
-	step, ok := item.(NoSnack)
+	step, ok := item.(steps.NoSnack)
 	if !ok {
 		return fmt.Errorf(`expected NoSnack but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkSleep(item interface{}, start, end string) error {
-	step, ok := item.(Sleep)
+	step, ok := item.(steps.Sleep)
 	if !ok {
 		return fmt.Errorf(`expected Sleep but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkNoNap(item interface{}, start, end string) error {
-	step, ok := item.(NoNap)
+	step, ok := item.(steps.NoNap)
 	if !ok {
 		return fmt.Errorf(`expected NoNap but got %T`, item)
 	}
-	return checkDateRange(start, end, step.start, step.end)
+	return checkDateRange(start, end, step.Start, step.End)
 }
 
 func checkSetWatch(item interface{}, at string) error {
-	step, ok := item.(SetWatch)
+	step, ok := item.(steps.SetWatch)
 	if !ok {
 		return fmt.Errorf(`expected SetWatch but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkArrive(item interface{}, at string) error {
-	step, ok := item.(Arrive)
+	step, ok := item.(steps.Arrive)
 	if !ok {
 		return fmt.Errorf(`expected Arrive but got %T`, item)
 	}
-	return checkDateAt(at, step.at)
+	return checkDateAt(at, step.At)
 }
 
 func checkDateRange(expectedStart, expectedEnd string, actualStart, actualEnd time.Time) error {
