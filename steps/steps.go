@@ -43,7 +43,24 @@ type NoCaffeine struct {
 }
 
 func (s NoCaffeine) ToIcs(lang localization.Lang) string {
-	return localization.NoCaffeine[lang].Title
+	builder := strings.Builder{}
+	builder.Write([]byte("BEGIN:VEVENT\r\n"))
+	builder.Write([]byte("UID:"))
+	builder.Write([]byte(FmtDt(s.Start)))
+	builder.Write([]byte("NoCaffeine@timegiver.app\r\n"))
+	builder.Write([]byte("DTSTAMP:"))
+	builder.Write([]byte(FmtDt(s.Start)))
+	builder.Write([]byte("\r\nDTSTART:"))
+	builder.Write([]byte(FmtDt(s.Start)))
+	builder.Write([]byte("\r\nDTEND:"))
+	builder.Write([]byte(FmtDt(s.End)))
+	builder.Write([]byte("\r\n"))
+	builder.Write([]byte(Wrap("SUMMARY:", localization.NoCaffeine[lang].Title)))
+	builder.Write([]byte("\r\n"))
+	builder.Write([]byte(Wrap("DESCRIPTION:", localization.NoCaffeine[lang].Description)))
+	builder.Write([]byte("\r\nCATEGORIES:TimeGiver\r\n"))
+	builder.Write([]byte("END:VEVENT\r\n"))
+	return builder.String()
 }
 
 type CaffeineOk struct {
