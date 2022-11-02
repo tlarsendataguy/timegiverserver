@@ -92,7 +92,7 @@ type CaffeineOk struct {
 }
 
 func (s CaffeineOk) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`CaffeineOk`, localization.CaffeineOk[lang], s.Start, s.End)
 }
 
 type Caffeine3C struct {
@@ -101,7 +101,7 @@ type Caffeine3C struct {
 }
 
 func (s Caffeine3C) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`Caffeine3C`, localization.Caffeine3C[lang], s.Start, s.End)
 }
 
 type Caffeine2C struct {
@@ -110,7 +110,7 @@ type Caffeine2C struct {
 }
 
 func (s Caffeine2C) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`Caffeine2C`, localization.Caffeine2C[lang], s.Start, s.End)
 }
 
 type LightBreakfast struct {
@@ -118,7 +118,7 @@ type LightBreakfast struct {
 }
 
 func (s LightBreakfast) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`LightBreakfast`, localization.LightBreakfast[lang], s.At, s.At.Add(time.Hour))
 }
 
 type LightLunch struct {
@@ -126,7 +126,7 @@ type LightLunch struct {
 }
 
 func (s LightLunch) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`LightLunch`, localization.LightLunch[lang], s.At, s.At.Add(time.Hour))
 }
 
 type LightDinner struct {
@@ -134,7 +134,7 @@ type LightDinner struct {
 }
 
 func (s LightDinner) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`LightDinner`, localization.LightDinner[lang], s.At, s.At.Add(time.Hour))
 }
 
 type LightDinnerOptional struct {
@@ -142,7 +142,7 @@ type LightDinnerOptional struct {
 }
 
 func (s LightDinnerOptional) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`LightDinnerOptional`, localization.LightDinnerOptional[lang], s.At, s.At.Add(time.Hour))
 }
 
 type HeavyBreakfast struct {
@@ -150,7 +150,7 @@ type HeavyBreakfast struct {
 }
 
 func (s HeavyBreakfast) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`HeavyBreakfast`, localization.HeavyBreakfast[lang], s.At, s.At.Add(time.Hour))
 }
 
 type HeavyLunch struct {
@@ -158,7 +158,7 @@ type HeavyLunch struct {
 }
 
 func (s HeavyLunch) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`HeavyLunch`, localization.HeavyLunch[lang], s.At, s.At.Add(time.Hour))
 }
 
 type HeavyDinner struct {
@@ -166,7 +166,7 @@ type HeavyDinner struct {
 }
 
 func (s HeavyDinner) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`HeavyDinner`, localization.HeavyDinner[lang], s.At, s.At.Add(time.Hour))
 }
 
 type NoSnack struct {
@@ -175,7 +175,7 @@ type NoSnack struct {
 }
 
 func (s NoSnack) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`NoSnack`, localization.NoSnack[lang], s.Start, s.End)
 }
 
 type Sleep struct {
@@ -184,7 +184,7 @@ type Sleep struct {
 }
 
 func (s Sleep) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`Sleep`, localization.Sleep[lang], s.Start, s.End)
 }
 
 type NoNap struct {
@@ -193,7 +193,7 @@ type NoNap struct {
 }
 
 func (s NoNap) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`NoNap`, localization.NoNap[lang], s.Start, s.End)
 }
 
 type SetWatch struct {
@@ -201,7 +201,7 @@ type SetWatch struct {
 }
 
 func (s SetWatch) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`SetWatch`, localization.SetWatch[lang], s.At, s.At)
 }
 
 type Arrive struct {
@@ -209,5 +209,5 @@ type Arrive struct {
 }
 
 func (s Arrive) ToIcs(lang localization.Lang) string {
-	return ``
+	return toIcs(`Arrive`, localization.Arrive[lang], s.At, s.At)
 }
