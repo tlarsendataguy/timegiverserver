@@ -760,6 +760,73 @@ func TestWest12(t *testing.T) {
 	}
 }
 
+func TestWest34(t *testing.T) {
+	plan := generatePlan(0, -4)
+	if err := checkNoCaffeine(plan[0], `2017-01-12 06:00`, `2017-01-12 15:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[1], `2017-01-12 15:00`, `2017-01-12 16:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[2], `2017-01-12 16:30`, `2017-01-13 15:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[3], `2017-01-13 15:00`, `2017-01-13 16:30`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[4], `2017-01-13 16:30`, `2017-01-14 07:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeineOk(plan[5], `2017-01-14 07:00`, `2017-01-14 11:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[6], `2017-01-14 11:00`, `2017-01-15 06:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkCaffeine3C(plan[7], `2017-01-15 06:00`, `2017-01-15 11:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkNoCaffeine(plan[8], `2017-01-15 11:00`, `2017-01-16 02:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkLightBreakfast(plan[9], `2017-01-14 07:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkLightLunch(plan[10], `2017-01-14 12:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkLightDinner(plan[11], `2017-01-14 17:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkHeavyBreakfast(plan[12], `2017-01-15 11:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkHeavyLunch(plan[13], `2017-01-15 16:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkHeavyDinner(plan[14], `2017-01-15 21:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkSleep(plan[15], `2017-01-12 22:00`, `2017-01-13 06:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkSleep(plan[16], `2017-01-13 22:00`, `2017-01-14 06:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkSleep(plan[17], `2017-01-14 22:00`, `2017-01-15 06:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkSleep(plan[18], `2017-01-16 02:00`, `2017-01-16 10:00`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err := checkSetWatch(plan[19], `2017-01-15 11:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+	if err := checkArrive(plan[20], `2017-01-15 16:00`); err != nil {
+		t.Fatal(err.Error())
+	}
+}
+
 func checkNoCaffeine(item interface{}, start, end string) error {
 	step, ok := item.(steps.NoCaffeine)
 	if !ok {
