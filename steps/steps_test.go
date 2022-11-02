@@ -1,6 +1,7 @@
 package steps
 
 import (
+	"strings"
 	"testing"
 	"time"
 	"timegiverserver/steps/localization"
@@ -10,7 +11,9 @@ var start = time.Date(2022, 1, 2, 3, 0, 12, 0, time.UTC)
 var end = time.Date(2022, 1, 2, 4, 30, 0, 0, time.UTC)
 
 func TestDateTimeFormatting(t *testing.T) {
-	actual := FmtDt(start)
+	s := &strings.Builder{}
+	fmtDt(s, start)
+	actual := s.String()
 	expected := `20220102T030000Z`
 	if actual != expected {
 		t.Fatalf(`expected %v but got %v`, expected, actual)
@@ -18,7 +21,9 @@ func TestDateTimeFormatting(t *testing.T) {
 }
 
 func TestWrapShort(t *testing.T) {
-	actual := Wrap(`SUMMARY:`, `hello world`)
+	s := &strings.Builder{}
+	wrap(s, `SUMMARY:`, `hello world`)
+	actual := s.String()
 	expected := `SUMMARY:hello world`
 	if actual != expected {
 		t.Fatalf(`expected '%v' but got '%v'`, expected, actual)
@@ -26,7 +31,9 @@ func TestWrapShort(t *testing.T) {
 }
 
 func TestWrap2Lines(t *testing.T) {
-	actual := Wrap(`SUMMARY:`, `this line plus header is more than 75 bytes and must be wrapped onto 2 lines`)
+	s := &strings.Builder{}
+	wrap(s, `SUMMARY:`, `this line plus header is more than 75 bytes and must be wrapped onto 2 lines`)
+	actual := s.String()
 	expected := "SUMMARY:this line plus header is more than 75 bytes and must be wrapped ont\r\n o 2 lines"
 	if actual != expected {
 		t.Fatalf(`expected '%v' but got '%v'`, expected, actual)

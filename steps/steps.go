@@ -6,12 +6,11 @@ import (
 	"timegiverserver/steps/localization"
 )
 
-func FmtDt(value time.Time) string {
-	return value.Format(`20060102T150400Z`)
+func fmtDt(s *strings.Builder, value time.Time) {
+	s.Write([]byte(value.Format(`20060102T150400Z`)))
 }
 
-func Wrap(header, content string) string {
-	builder := strings.Builder{}
+func wrap(s *strings.Builder, header, content string) {
 	toWrite := append([]byte(header), []byte(content)...)
 	size := len(toWrite)
 	position := 0
@@ -19,14 +18,55 @@ func Wrap(header, content string) string {
 
 	for remainder > 0 {
 		amount := min(remainder, 75)
-		builder.Write(toWrite[position : position+amount])
+		s.Write(toWrite[position : position+amount])
 		if remainder > 75 {
-			builder.Write([]byte("\r\n "))
+			s.Write([]byte("\r\n "))
 		}
 		position += amount
 		remainder -= amount
 	}
+}
 
+func beginEvent(s *strings.Builder) {
+	s.Write([]byte("BEGIN:VEVENT\r\n"))
+}
+
+func writeUid(s *strings.Builder, start time.Time, stepId string) {
+	s.Write([]byte("UID:"))
+	fmtDt(s, start)
+	s.Write([]byte(stepId))
+	s.Write([]byte("@timegiver.app\r\n"))
+}
+
+func writeDates(s *strings.Builder, start, end time.Time) {
+	s.Write([]byte("DTSTAMP:"))
+	fmtDt(s, start)
+	s.Write([]byte("\r\nDTSTART:"))
+	fmtDt(s, start)
+	s.Write([]byte("\r\nDTEND:"))
+	fmtDt(s, end)
+	s.Write([]byte("\r\n"))
+}
+
+func writeTexts(s *strings.Builder, texts localization.StepText) {
+	wrap(s, "SUMMARY:", texts.Title)
+	s.Write([]byte("\r\n"))
+	wrap(s, "DESCRIPTION:", texts.Description)
+	s.Write([]byte("\r\n"))
+}
+
+func endEvent(s *strings.Builder) {
+	s.Write([]byte("CATEGORIES:TimeGiver\r\n"))
+	s.Write([]byte("END:VEVENT\r\n"))
+}
+
+func toIcs(stepId string, texts localization.StepText, start, end time.Time) string {
+	builder := &strings.Builder{}
+	beginEvent(builder)
+	writeUid(builder, start, stepId)
+	writeDates(builder, start, end)
+	writeTexts(builder, texts)
+	endEvent(builder)
 	return builder.String()
 }
 
@@ -43,24 +83,7 @@ type NoCaffeine struct {
 }
 
 func (s NoCaffeine) ToIcs(lang localization.Lang) string {
-	builder := strings.Builder{}
-	builder.Write([]byte("BEGIN:VEVENT\r\n"))
-	builder.Write([]byte("UID:"))
-	builder.Write([]byte(FmtDt(s.Start)))
-	builder.Write([]byte("NoCaffeine@timegiver.app\r\n"))
-	builder.Write([]byte("DTSTAMP:"))
-	builder.Write([]byte(FmtDt(s.Start)))
-	builder.Write([]byte("\r\nDTSTART:"))
-	builder.Write([]byte(FmtDt(s.Start)))
-	builder.Write([]byte("\r\nDTEND:"))
-	builder.Write([]byte(FmtDt(s.End)))
-	builder.Write([]byte("\r\n"))
-	builder.Write([]byte(Wrap("SUMMARY:", localization.NoCaffeine[lang].Title)))
-	builder.Write([]byte("\r\n"))
-	builder.Write([]byte(Wrap("DESCRIPTION:", localization.NoCaffeine[lang].Description)))
-	builder.Write([]byte("\r\nCATEGORIES:TimeGiver\r\n"))
-	builder.Write([]byte("END:VEVENT\r\n"))
-	return builder.String()
+	return toIcs(`NoCaffeine`, localization.NoCaffeine[lang], s.Start, s.End)
 }
 
 type CaffeineOk struct {
