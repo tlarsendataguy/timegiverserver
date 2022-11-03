@@ -1,8 +1,8 @@
-package timegiverserver
+package calculator
 
 import (
 	"time"
-	"timegiverserver/steps"
+	"timegiverserver/calculator/steps"
 )
 
 const t0700 = time.Hour * 7

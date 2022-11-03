@@ -4,7 +4,7 @@ import (
 	"strings"
 	"testing"
 	"time"
-	"timegiverserver/steps/localization"
+	"timegiverserver/calculator/steps/localization"
 )
 
 var start = time.Date(2022, 1, 2, 3, 0, 12, 0, time.UTC)

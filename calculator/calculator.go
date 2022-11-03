@@ -1,12 +1,12 @@
-package timegiverserver
+package calculator
 
 import (
 	"fmt"
 	"time"
-	"timegiverserver/base"
-	"timegiverserver/shift"
-	"timegiverserver/steps"
-	"timegiverserver/steps/localization"
+	"timegiverserver/calculator/base"
+	"timegiverserver/calculator/shift"
+	"timegiverserver/calculator/steps"
+	"timegiverserver/calculator/steps/localization"
 )
 
 type Step interface {

@@ -1,10 +1,10 @@
-package timegiverserver
+package calculator
 
 import (
 	"fmt"
 	"testing"
 	"time"
-	"timegiverserver/steps"
+	"timegiverserver/calculator/steps"
 )
 
 var arrival = time.Date(2017, 1, 15, 12, 0, 0, 0, time.UTC)
