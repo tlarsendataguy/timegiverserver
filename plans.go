@@ -310,7 +310,7 @@ func West34(c *Calculator) []Step {
 }
 
 func West56(c *Calculator) []Step {
-	departureLess1Wakeup := min(c.sleep()+twoHours, t1000)
+	departureLess1Wakeup := min(c.wake()+twoHours, t1000)
 
 	return []Step{
 		//Caffeine
