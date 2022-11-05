@@ -1266,7 +1266,7 @@ func checkDateAt(expectedAt string, actualAt time.Time) error {
 	return nil
 }
 
-func generatePlan(departureOffset, arrivalOffset float64) []Step {
+func generatePlan(departureOffset, arrivalOffset float64) []steps.Step {
 	calc := InitializeCalculator(Inputs{
 		Language:        "EN",
 		Arrival:         arrival,

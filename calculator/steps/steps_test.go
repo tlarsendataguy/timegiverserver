@@ -40,8 +40,14 @@ func TestWrap2Lines(t *testing.T) {
 	}
 }
 
+func getIcsString(step Step, lang localization.Lang) string {
+	builder := &strings.Builder{}
+	step.BuildIcs(builder, lang)
+	return builder.String()
+}
+
 func TestNoCaffeineToIcs(t *testing.T) {
-	ics := NoCaffeine{Start: start, End: end}.ToIcs(localization.EN)
+	ics := getIcsString(NoCaffeine{Start: start, End: end}, localization.EN)
 	expected := "BEGIN:VEVENT\r\nUID:20220102T030000ZNoCaffeine@timegiver.app\r\nDTSTAMP:20220102T030000Z\r\nDTSTART:20220102T030000Z\r\nDTEND:20220102T043000Z\r\nSUMMARY:No caffeine\r\nDESCRIPTION:Refrain from consuming caffeine.  In addition to coffee and tea\r\n , caffeine may also be present in soft drinks and chocolate.\r\nCATEGORIES:TimeGiver\r\nEND:VEVENT\r\n"
 	if ics != expected {
 		t.Fatalf("expected\n\n%v\n\nbut got\n\n%v", expected, ics)
@@ -50,7 +56,7 @@ func TestNoCaffeineToIcs(t *testing.T) {
 }
 
 func TestCaffeineOkToIcs(t *testing.T) {
-	ics := CaffeineOk{Start: start, End: end}.ToIcs(localization.HI)
+	ics := getIcsString(CaffeineOk{Start: start, End: end}, localization.HI)
 	if !strings.Contains(ics, `CaffeineOk`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -61,7 +67,7 @@ func TestCaffeineOkToIcs(t *testing.T) {
 }
 
 func TestCaffeine3CToIcs(t *testing.T) {
-	ics := Caffeine3C{Start: start, End: end}.ToIcs(localization.PT)
+	ics := getIcsString(Caffeine3C{Start: start, End: end}, localization.PT)
 	if !strings.Contains(ics, `Caffeine3C`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -72,7 +78,7 @@ func TestCaffeine3CToIcs(t *testing.T) {
 }
 
 func TestCaffeine2CToIcs(t *testing.T) {
-	ics := Caffeine2C{Start: start, End: end}.ToIcs(localization.DE)
+	ics := getIcsString(Caffeine2C{Start: start, End: end}, localization.DE)
 	if !strings.Contains(ics, `Caffeine2C`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -83,7 +89,7 @@ func TestCaffeine2CToIcs(t *testing.T) {
 }
 
 func TestLightBreakfastToIcs(t *testing.T) {
-	ics := LightBreakfast{At: start}.ToIcs(localization.ES)
+	ics := getIcsString(LightBreakfast{At: start}, localization.ES)
 	if !strings.Contains(ics, `LightBreakfast`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -94,7 +100,7 @@ func TestLightBreakfastToIcs(t *testing.T) {
 }
 
 func TestLightLunchToIcs(t *testing.T) {
-	ics := LightLunch{At: start}.ToIcs(localization.FR)
+	ics := getIcsString(LightLunch{At: start}, localization.FR)
 	if !strings.Contains(ics, `LightLunch`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -105,7 +111,7 @@ func TestLightLunchToIcs(t *testing.T) {
 }
 
 func TestLightDinnerToIcs(t *testing.T) {
-	ics := LightDinner{At: start}.ToIcs(localization.JA)
+	ics := getIcsString(LightDinner{At: start}, localization.JA)
 	if !strings.Contains(ics, `LightDinner`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -116,7 +122,7 @@ func TestLightDinnerToIcs(t *testing.T) {
 }
 
 func TestLightDinnerOptionalToIcs(t *testing.T) {
-	ics := LightDinnerOptional{At: start}.ToIcs(localization.RU)
+	ics := getIcsString(LightDinnerOptional{At: start}, localization.RU)
 	if !strings.Contains(ics, `LightDinnerOptional`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -127,7 +133,7 @@ func TestLightDinnerOptionalToIcs(t *testing.T) {
 }
 
 func TestHeavyBreakfastToIcs(t *testing.T) {
-	ics := HeavyBreakfast{At: start}.ToIcs(localization.ES)
+	ics := getIcsString(HeavyBreakfast{At: start}, localization.ES)
 	if !strings.Contains(ics, `HeavyBreakfast`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -138,7 +144,7 @@ func TestHeavyBreakfastToIcs(t *testing.T) {
 }
 
 func TestHeavyLunchToIcs(t *testing.T) {
-	ics := HeavyLunch{At: start}.ToIcs(localization.FR)
+	ics := getIcsString(HeavyLunch{At: start}, localization.FR)
 	if !strings.Contains(ics, `HeavyLunch`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -149,7 +155,7 @@ func TestHeavyLunchToIcs(t *testing.T) {
 }
 
 func TestHeavyDinnerToIcs(t *testing.T) {
-	ics := HeavyDinner{At: start}.ToIcs(localization.JA)
+	ics := getIcsString(HeavyDinner{At: start}, localization.JA)
 	if !strings.Contains(ics, `HeavyDinner`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -160,7 +166,7 @@ func TestHeavyDinnerToIcs(t *testing.T) {
 }
 
 func TestNoSnackToIcs(t *testing.T) {
-	ics := NoSnack{Start: start, End: end}.ToIcs(localization.ZH)
+	ics := getIcsString(NoSnack{Start: start, End: end}, localization.ZH)
 	if !strings.Contains(ics, `NoSnack`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -171,7 +177,7 @@ func TestNoSnackToIcs(t *testing.T) {
 }
 
 func TestSleepToIcs(t *testing.T) {
-	ics := Sleep{Start: start, End: end}.ToIcs(localization.EN)
+	ics := getIcsString(Sleep{Start: start, End: end}, localization.EN)
 	if !strings.Contains(ics, `Sleep`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -182,7 +188,7 @@ func TestSleepToIcs(t *testing.T) {
 }
 
 func TestNoNapToIcs(t *testing.T) {
-	ics := NoNap{Start: start, End: end}.ToIcs(localization.EN)
+	ics := getIcsString(NoNap{Start: start, End: end}, localization.EN)
 	if !strings.Contains(ics, `NoNap`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -193,7 +199,7 @@ func TestNoNapToIcs(t *testing.T) {
 }
 
 func TestSetWatchToIcs(t *testing.T) {
-	ics := SetWatch{At: start}.ToIcs(localization.EN)
+	ics := getIcsString(SetWatch{At: start}, localization.EN)
 	if !strings.Contains(ics, `SetWatch`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
@@ -204,7 +210,7 @@ func TestSetWatchToIcs(t *testing.T) {
 }
 
 func TestArriveToIcs(t *testing.T) {
-	ics := Arrive{At: start}.ToIcs(localization.EN)
+	ics := getIcsString(Arrive{At: start}, localization.EN)
 	if !strings.Contains(ics, `Arrive`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}

@@ -23,8 +23,8 @@ const threeHours = time.Hour * 3
 const fiveHours = time.Hour * 5
 const sevenHours = time.Hour * 7
 
-func East12(c *Calculator) []Step {
-	return []Step{
+func East12(c *Calculator) []steps.Step {
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess2At(c.wake()), End: c.departureLess2At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess2At(t1500), End: c.departureLess2At(t1630)},
@@ -51,12 +51,12 @@ func East12(c *Calculator) []Step {
 	}
 }
 
-func East34(c *Calculator) []Step {
+func East34(c *Calculator) []steps.Step {
 	pre1Dinner := min(c.dinner(), t1800)
 	pre1Sleep := max(pre1Dinner+oneHour, t1800)
 	arrivalSleep := min(c.sleep(), t2230)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},
@@ -93,12 +93,12 @@ func East34(c *Calculator) []Step {
 	}
 }
 
-func East56(c *Calculator) []Step {
+func East56(c *Calculator) []steps.Step {
 	pre1Dinner := min(c.dinner(), t1800)
 	pre1Sleep := max(pre1Dinner+oneHour, t1800)
 	arrivalSleep := min(c.sleep(), t2200)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},
@@ -144,12 +144,12 @@ func East56(c *Calculator) []Step {
 	}
 }
 
-func East78(c *Calculator) []Step {
+func East78(c *Calculator) []steps.Step {
 	pre1Dinner := min(c.dinner(), t1700)
 	pre1Sleep := max(pre1Dinner+oneHour, t1700)
 	arrivalSleep := min(c.sleep(), t2200)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},
@@ -197,11 +197,11 @@ func East78(c *Calculator) []Step {
 	}
 }
 
-func East910(c *Calculator) []Step {
+func East910(c *Calculator) []steps.Step {
 	arrivalSleep := min(c.sleep(), t2200)
 	arrivalDinner := min(c.dinner(), arrivalSleep-oneHour)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},
@@ -246,8 +246,8 @@ func East910(c *Calculator) []Step {
 	}
 }
 
-func West12(c *Calculator) []Step {
-	return []Step{
+func West12(c *Calculator) []steps.Step {
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess2At(c.wake()), End: c.departureLess2At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess2At(t1500), End: c.departureLess2At(t1630)},
@@ -276,8 +276,8 @@ func West12(c *Calculator) []Step {
 	}
 }
 
-func West34(c *Calculator) []Step {
-	return []Step{
+func West34(c *Calculator) []steps.Step {
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess3At(c.wake()), End: c.departureLess3At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess3At(t1500), End: c.departureLess3At(t1630)},
@@ -309,10 +309,10 @@ func West34(c *Calculator) []Step {
 	}
 }
 
-func West56(c *Calculator) []Step {
+func West56(c *Calculator) []steps.Step {
 	departureLess1Wakeup := min(c.wake()+twoHours, t1000)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},
@@ -355,11 +355,11 @@ func West56(c *Calculator) []Step {
 	}
 }
 
-func West78(c *Calculator) []Step {
+func West78(c *Calculator) []steps.Step {
 	departureWake := c.wake() + threeHours
 	departureBreakfast := min(c.breakfast()+threeHours, c.wake()+fiveHours)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess3At(c.wake()), End: c.departureLess3At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess3At(t1500), End: c.departureLess3At(t1630)},
@@ -401,12 +401,12 @@ func West78(c *Calculator) []Step {
 	}
 }
 
-func West910(c *Calculator) []Step {
+func West910(c *Calculator) []steps.Step {
 	departureWake := c.wake() + threeHours
 	departureBreakfast := c.breakfast() + threeHours
 	departureLunch := min(c.lunch()+threeHours, c.breakfast()+sevenHours)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess3At(c.wake()), End: c.departureLess3At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess3At(t1500), End: c.departureLess3At(t1630)},
@@ -449,10 +449,10 @@ func West910(c *Calculator) []Step {
 	}
 }
 
-func Both1112(c *Calculator) []Step {
+func Both1112(c *Calculator) []steps.Step {
 	arrivalSleep := min(c.sleep(), t2200)
 
-	return []Step{
+	return []steps.Step{
 		//Caffeine
 		steps.NoCaffeine{Start: c.departureLess4At(c.wake()), End: c.departureLess4At(t1500)},
 		steps.CaffeineOk{Start: c.departureLess4At(t1500), End: c.departureLess4At(t1630)},

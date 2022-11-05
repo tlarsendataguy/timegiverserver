@@ -6,12 +6,7 @@ import (
 	"timegiverserver/calculator/base"
 	"timegiverserver/calculator/shift"
 	"timegiverserver/calculator/steps"
-	"timegiverserver/calculator/steps/localization"
 )
-
-type Step interface {
-	ToIcs(lang localization.Lang) string
-}
 
 type DailyRoutine struct {
 	Wake      time.Duration
@@ -29,7 +24,7 @@ type Inputs struct {
 	Routine         DailyRoutine
 }
 
-type CalcPlan func(*Calculator) []Step
+type CalcPlan func(*Calculator) []steps.Step
 
 type Calculator struct {
 	Dates    base.Dates
@@ -37,11 +32,11 @@ type Calculator struct {
 	calcPlan CalcPlan
 }
 
-func (c *Calculator) Plan() []Step {
+func (c *Calculator) Plan() []steps.Step {
 	return c.calcPlan(c)
 }
 
-func (c *Calculator) arrivalStep() Step {
+func (c *Calculator) arrivalStep() steps.Step {
 	return steps.Arrive{At: c.Dates.ArriveAt}
 }
 
