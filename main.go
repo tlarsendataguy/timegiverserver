@@ -10,7 +10,7 @@ import (
 
 func main() {
 	e := mux.NewRouter()
-	e.HandleFunc(`/calculate`, nil).Methods(`POST`)
+	e.HandleFunc(`/api/calculate`, nil).Methods(`POST`)
 	m := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache(`certs`),
