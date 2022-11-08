@@ -6,17 +6,38 @@ import (
 	"io"
 	"math"
 	"net/mail"
+	"regexp"
+	"strings"
+	"time"
 )
 
 type CalcPayload struct {
 	DepartureOffset float64
 	ArrivalOffset   float64
 	Email           string
+	Arrival         time.Time
+	Wake            time.Duration
+	Breakfast       time.Duration
+	Lunch           time.Duration
+	Dinner          time.Duration
+	Sleep           time.Duration
+}
+
+type tempPayload struct {
+	DepartureOffset float64
+	ArrivalOffset   float64
+	Email           string
+	Arrival         string
+	Wake            string
+	Breakfast       string
+	Lunch           string
+	Dinner          string
+	Sleep           string
 }
 
 func ValidateCalcPayload(r io.Reader) (CalcPayload, error) {
 	d := json.NewDecoder(r)
-	payload := CalcPayload{}
+	payload := tempPayload{}
 	err := d.Decode(&payload)
 	if err != nil {
 		return CalcPayload{}, errors.New(`invalid JSON`)
@@ -27,5 +48,57 @@ func ValidateCalcPayload(r io.Reader) (CalcPayload, error) {
 	if math.Trunc(payload.DepartureOffset) == math.Trunc(payload.ArrivalOffset) {
 		return CalcPayload{}, errors.New(`no plan is needed when departure offset is equivalent to arrival offset`)
 	}
-	return payload, err
+
+	output := CalcPayload{
+		DepartureOffset: payload.DepartureOffset,
+		ArrivalOffset:   payload.ArrivalOffset,
+		Email:           payload.Email,
+	}
+
+	output.Arrival, err = time.Parse(`20060102T150405`, payload.Arrival)
+	if err != nil {
+		return CalcPayload{}, errors.New(`invalid date provided for Arrival`)
+	}
+	output.Wake, err = parseTime(payload.Wake)
+	if err != nil {
+		return CalcPayload{}, errors.New(`error parsing Wake: ` + err.Error())
+	}
+	output.Breakfast, err = parseTime(payload.Breakfast)
+	if err != nil {
+		return CalcPayload{}, errors.New(`error parsing Breakfast: ` + err.Error())
+	}
+	output.Lunch, err = parseTime(payload.Lunch)
+	if err != nil {
+		return CalcPayload{}, errors.New(`error parsing Lunch: ` + err.Error())
+	}
+	output.Dinner, err = parseTime(payload.Dinner)
+	if err != nil {
+		return CalcPayload{}, errors.New(`error parsing Dinner: ` + err.Error())
+	}
+	output.Sleep, err = parseTime(payload.Sleep)
+	if err != nil {
+		return CalcPayload{}, errors.New(`error parsing Sleep: ` + err.Error())
+	}
+
+	return output, nil
+}
+
+func parseTime(value string) (time.Duration, error) {
+	if valid, _ := regexp.MatchString(`^[0-9]{2}:[0-9]{2}$`, value); !valid {
+		return 0 * time.Minute, errors.New(`time is not formatted correctly`)
+	}
+	pieces := strings.Split(value, `:`)
+	builder := strings.Builder{}
+	builder.WriteString(pieces[0])
+	builder.WriteString(`h`)
+	builder.WriteString(pieces[1])
+	builder.WriteString(`m`)
+	d, err := time.ParseDuration(builder.String())
+	if err != nil {
+		return 0 * time.Minute, errors.New(`time is not formatted correctly`)
+	}
+	if hrs := d.Hours(); hrs < 0 || hrs >= 24 {
+		return 0 * time.Minute, errors.New(`time is not between 00:00 and 23:59`)
+	}
+	return d, nil
 }
