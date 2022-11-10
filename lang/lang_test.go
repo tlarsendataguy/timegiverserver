@@ -17,7 +17,6 @@ func TestLanguageAndLocale(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
-
 }
 
 func TestAnyLanguageDefaultsToEnglish(t *testing.T) {
@@ -25,14 +24,17 @@ func TestAnyLanguageDefaultsToEnglish(t *testing.T) {
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+}
 
+func TestPickFirstWeightedMatch(t *testing.T) {
+	err := checkParse(`af-ZA,ga;q=0.9,hi;q=0.5,en;q=0.1`, HI)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
 }
 
 func checkParse(value string, expected Lang) error {
-	actual, err := ParseLang(value)
-	if err != nil {
-		return fmt.Errorf(`expected no error but got: %v`, err.Error())
-	}
+	actual := ParseLang(value)
 	if actual != expected {
 		return fmt.Errorf(`expected %v but got %v`, expected, actual)
 	}
