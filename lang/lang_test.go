@@ -1,13 +1,24 @@
 package lang
 
-import "testing"
+import (
+	"fmt"
+	"testing"
+)
 
 func TestAmericanEnglish(t *testing.T) {
-	lang, err := ParseLang(`en-US`)
+	err := checkParse(`en-US`, EN)
 	if err != nil {
-		t.Fatalf(`expected no error but got: %v`, err.Error())
+		t.Fatalf(err.Error())
 	}
-	if lang != EN {
-		t.Fatalf(`expected %v but got %v`, EN, lang)
+}
+
+func checkParse(value string, expected Lang) error {
+	actual, err := ParseLang(value)
+	if err != nil {
+		return fmt.Errorf(`expected no error but got: %v`, err.Error())
 	}
+	if actual != expected {
+		return fmt.Errorf(`expected %v but got %v`, expected, actual)
+	}
+	return nil
 }
