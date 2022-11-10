@@ -4,10 +4,11 @@ import (
 	"strings"
 	"time"
 	"timegiverserver/calculator/steps/localization"
+	"timegiverserver/lang"
 )
 
 type Step interface {
-	BuildIcs(builder *strings.Builder, lang localization.Lang)
+	BuildIcs(builder *strings.Builder, lang lang.Lang)
 }
 
 func fmtDt(s *strings.Builder, value time.Time) {
@@ -84,7 +85,7 @@ type NoCaffeine struct {
 	End   time.Time
 }
 
-func (s NoCaffeine) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s NoCaffeine) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `NoCaffeine`, localization.NoCaffeine[lang], s.Start, s.End)
 }
 
@@ -93,7 +94,7 @@ type CaffeineOk struct {
 	End   time.Time
 }
 
-func (s CaffeineOk) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s CaffeineOk) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `CaffeineOk`, localization.CaffeineOk[lang], s.Start, s.End)
 }
 
@@ -102,7 +103,7 @@ type Caffeine3C struct {
 	End   time.Time
 }
 
-func (s Caffeine3C) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s Caffeine3C) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `Caffeine3C`, localization.Caffeine3C[lang], s.Start, s.End)
 }
 
@@ -111,7 +112,7 @@ type Caffeine2C struct {
 	End   time.Time
 }
 
-func (s Caffeine2C) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s Caffeine2C) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `Caffeine2C`, localization.Caffeine2C[lang], s.Start, s.End)
 }
 
@@ -119,7 +120,7 @@ type LightBreakfast struct {
 	At time.Time
 }
 
-func (s LightBreakfast) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s LightBreakfast) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `LightBreakfast`, localization.LightBreakfast[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -127,7 +128,7 @@ type LightLunch struct {
 	At time.Time
 }
 
-func (s LightLunch) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s LightLunch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `LightLunch`, localization.LightLunch[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -135,7 +136,7 @@ type LightDinner struct {
 	At time.Time
 }
 
-func (s LightDinner) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s LightDinner) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `LightDinner`, localization.LightDinner[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -143,7 +144,7 @@ type LightDinnerOptional struct {
 	At time.Time
 }
 
-func (s LightDinnerOptional) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s LightDinnerOptional) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `LightDinnerOptional`, localization.LightDinnerOptional[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -151,7 +152,7 @@ type HeavyBreakfast struct {
 	At time.Time
 }
 
-func (s HeavyBreakfast) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s HeavyBreakfast) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `HeavyBreakfast`, localization.HeavyBreakfast[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -159,7 +160,7 @@ type HeavyLunch struct {
 	At time.Time
 }
 
-func (s HeavyLunch) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s HeavyLunch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `HeavyLunch`, localization.HeavyLunch[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -167,7 +168,7 @@ type HeavyDinner struct {
 	At time.Time
 }
 
-func (s HeavyDinner) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s HeavyDinner) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `HeavyDinner`, localization.HeavyDinner[lang], s.At, s.At.Add(time.Hour))
 }
 
@@ -176,7 +177,7 @@ type NoSnack struct {
 	End   time.Time
 }
 
-func (s NoSnack) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s NoSnack) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `NoSnack`, localization.NoSnack[lang], s.Start, s.End)
 }
 
@@ -185,7 +186,7 @@ type Sleep struct {
 	End   time.Time
 }
 
-func (s Sleep) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s Sleep) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `Sleep`, localization.Sleep[lang], s.Start, s.End)
 }
 
@@ -194,7 +195,7 @@ type NoNap struct {
 	End   time.Time
 }
 
-func (s NoNap) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s NoNap) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `NoNap`, localization.NoNap[lang], s.Start, s.End)
 }
 
@@ -202,7 +203,7 @@ type SetWatch struct {
 	At time.Time
 }
 
-func (s SetWatch) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s SetWatch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `SetWatch`, localization.SetWatch[lang], s.At, s.At)
 }
 
@@ -210,6 +211,6 @@ type Arrive struct {
 	At time.Time
 }
 
-func (s Arrive) BuildIcs(builder *strings.Builder, lang localization.Lang) {
+func (s Arrive) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `Arrive`, localization.Arrive[lang], s.At, s.At)
 }

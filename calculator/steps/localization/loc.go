@@ -1,19 +1,5 @@
 package localization
 
-type Lang int
-
-const (
-	DE Lang = iota
-	EN
-	ES
-	FR
-	HI
-	JA
-	PT
-	RU
-	ZH
-)
-
 type StepText struct {
 	Title       string
 	Description string

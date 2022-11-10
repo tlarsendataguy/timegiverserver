@@ -3,10 +3,10 @@ package calculator
 import (
 	"strings"
 	"timegiverserver/calculator/steps"
-	"timegiverserver/calculator/steps/localization"
+	"timegiverserver/lang"
 )
 
-func BuildIcsFile(plan []steps.Step, lang localization.Lang) string {
+func BuildIcsFile(plan []steps.Step, lang lang.Lang) string {
 	builder := &strings.Builder{}
 	beginCalendar(builder)
 	for _, step := range plan {

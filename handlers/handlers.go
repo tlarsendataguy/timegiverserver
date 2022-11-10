@@ -32,7 +32,7 @@ func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
-	w.Write(content)
+	_, _ = w.Write(content)
 	w.WriteHeader(200)
 }
 
@@ -43,6 +43,6 @@ func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
-	w.Write(content)
+	_, _ = w.Write(content)
 	w.WriteHeader(200)
 }
