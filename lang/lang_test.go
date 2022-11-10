@@ -5,11 +5,27 @@ import (
 	"testing"
 )
 
-func TestAmericanEnglish(t *testing.T) {
-	err := checkParse(`en-US`, EN)
+func TestLanguageOnly(t *testing.T) {
+	err := checkParse(`en`, EN)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
+}
+
+func TestLanguageAndLocale(t *testing.T) {
+	err := checkParse(`es-CO`, ES)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
+}
+
+func TestAnyLanguageDefaultsToEnglish(t *testing.T) {
+	err := checkParse(`*`, EN)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+
 }
 
 func checkParse(value string, expected Lang) error {
