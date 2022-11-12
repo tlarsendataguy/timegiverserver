@@ -1,2 +1,3 @@
 .idea
 *.ics
+handlers/smtp_auth.json

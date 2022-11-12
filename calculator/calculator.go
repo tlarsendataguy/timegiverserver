@@ -17,7 +17,6 @@ type DailyRoutine struct {
 }
 
 type Inputs struct {
-	Language        string
 	Arrival         time.Time
 	DepartureOffset float64
 	ArrivalOffset   float64

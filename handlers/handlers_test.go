@@ -1,7 +1,10 @@
 package handlers
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/url"
@@ -10,7 +13,7 @@ import (
 )
 
 func TestLoadHandler(t *testing.T) {
-	settings, err := LoadSettings()
+	settings, err := LoadSettings(`settings.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -23,7 +26,7 @@ func TestLoadHandler(t *testing.T) {
 }
 
 func TestLoadHomepage(t *testing.T) {
-	settings, _ := LoadSettings()
+	settings, _ := LoadSettings(`settings.json`)
 	w := &testWriter{}
 	settings.HandleHomepage(w, nil)
 
@@ -34,7 +37,7 @@ func TestLoadHomepage(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	settings, _ := LoadSettings()
+	settings, _ := LoadSettings(`settings.json`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/scripts.js`)
 	settings.HandleFile(w, r)
@@ -42,6 +45,32 @@ func TestLoadFile(t *testing.T) {
 	err := checkResponse(w, 200, `./serveTest/scripts.js`)
 	if err != nil {
 		t.Fatalf(err.Error())
+	}
+}
+
+func TestCalculateEmail(t *testing.T) {
+	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
+	settings, _ := LoadSettings(`smtp_auth.json`)
+	w := &testWriter{}
+	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
+	r.Method = `POST`
+	body, _ := json.Marshal(tempPayload{
+		DepartureOffset: -4,
+		ArrivalOffset:   2,
+		Email:           "larsenthomasj@gmail.com",
+		Arrival:         `20220304T083000`,
+		Wake:            `06:00`,
+		Breakfast:       `07:00`,
+		Lunch:           `12:00`,
+		Dinner:          `17:00`,
+		Sleep:           `22:00`,
+	})
+	r.Body = io.NopCloser(bytes.NewReader(body))
+
+	settings.HandleCalculateApi(w, r)
+	if w.status != 200 {
+		t.Log(string(w.content))
+		t.Fatalf(`expected 200 but got %v`, w.status)
 	}
 }
 
