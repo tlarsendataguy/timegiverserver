@@ -93,7 +93,7 @@ func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	e.From = s.Emailer.From
 	e.To = []string{params.Email}
 	e.Subject = `Timegiver Plan`
-	e.Text = []byte(`Attached is your Timegiver plan to beat jet lag on your upcoming trip!`)
+	e.Text = []byte("Attached is your Timegiver plan to beat jet lag on your upcoming trip!\n\n")
 	_, err = e.Attach(strings.NewReader(ics), `plan.ics`, `text/calendar`)
 	if err != nil {
 		_, _ = w.Write([]byte(err.Error()))
