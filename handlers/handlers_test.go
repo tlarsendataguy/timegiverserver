@@ -49,7 +49,7 @@ func TestLoadFile(t *testing.T) {
 }
 
 func TestCalculateEmail(t *testing.T) {
-	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
+	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
 	settings, _ := LoadSettings(`smtp_auth.json`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/calculate`)

@@ -67,14 +67,21 @@ func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
+	langValue := getLangFromRequest(r)
 	params, err := ValidateCalcPayload(r.Body)
 	if err != nil {
-		_, _ = w.Write([]byte(err.Error()))
-		w.WriteHeader(400)
+		writeError(w, err)
 		return
 	}
-	langStr := r.Header.Get(http.CanonicalHeaderKey(`accept-language`))
-	langValue := lang.ParseLang(langStr)
+	err = s.emailPlan(params, langValue)
+	if err != nil {
+		writeError(w, err)
+		return
+	}
+	writeSuccess(w)
+}
+
+func (s *Settings) emailPlan(params CalcPayload, langValue lang.Lang) error {
 	calc := calculator.InitializeCalculator(calculator.Inputs{
 		Arrival:         params.Arrival,
 		DepartureOffset: params.DepartureOffset,
@@ -94,17 +101,27 @@ func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	e.To = []string{params.Email}
 	e.Subject = `Timegiver Plan`
 	e.Text = []byte("Attached is your Timegiver plan to beat jet lag on your upcoming trip!\n\n")
-	_, err = e.Attach(strings.NewReader(ics), `plan.ics`, `text/calendar`)
+	_, err := e.Attach(strings.NewReader(ics), `plan.ics`, `text/calendar`)
 	if err != nil {
-		_, _ = w.Write([]byte(err.Error()))
-		w.WriteHeader(500)
-		return
+		return err
 	}
 	err = e.Send(s.Emailer.Address, s.Emailer.Auth)
 	if err != nil {
-		_, _ = w.Write([]byte(err.Error()))
-		w.WriteHeader(500)
-		return
+		return err
 	}
+	return nil
+}
+
+func writeError(w http.ResponseWriter, err error) {
+	_, _ = w.Write([]byte(err.Error()))
+	w.WriteHeader(500)
+}
+
+func writeSuccess(w http.ResponseWriter) {
 	w.WriteHeader(200)
+}
+
+func getLangFromRequest(r *http.Request) lang.Lang {
+	langStr := r.Header.Get(http.CanonicalHeaderKey(`accept-language`))
+	return lang.ParseLang(langStr)
 }
