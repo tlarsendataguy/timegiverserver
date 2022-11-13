@@ -12,8 +12,9 @@ import (
 )
 
 func main() {
-	logger, err := os.OpenFile(`./Log.txt`, os.O_TRUNC, fs.ModePerm)
+	logger, err := os.OpenFile(`./Log.txt`, os.O_CREATE|os.O_TRUNC, fs.ModePerm)
 	if err != nil {
+		println(err.Error())
 		return
 	}
 	settings, err := handlers.LoadServerFromSettings(`settings.json`, logger, `PROD`)
@@ -23,8 +24,8 @@ func main() {
 	e := generateRouter(settings)
 	m := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
-		Cache:      autocert.DirCache(`certs`),
-		HostPolicy: autocert.HostWhitelist(`www.timegiver.app`),
+		Cache:      autocert.DirCache(settings.CertFolder),
+		HostPolicy: autocert.HostWhitelist(`timegiver.app`, `www.timegiver.app`),
 	}
 	serveTls := &http.Server{
 		Addr:         `:443`,

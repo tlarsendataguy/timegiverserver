@@ -2,3 +2,4 @@
 *.ics
 handlers/smtp_auth.json
 handlers/conn_str.json
+timegiverserver.exe

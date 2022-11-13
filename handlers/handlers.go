@@ -73,7 +73,6 @@ func (s *Server) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 		return
 	}
 	_, _ = w.Write(content)
-	w.WriteHeader(200)
 }
 
 func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
