@@ -27,7 +27,7 @@ type Smtp struct {
 	Auth     smtp.Auth
 }
 
-type Settings struct {
+type Server struct {
 	CertFolder  string
 	ServeFolder string
 	Emailer     Smtp
@@ -37,14 +37,14 @@ type Settings struct {
 	env         string
 }
 
-func (s *Settings) Log(format string, a ...interface{}) {
+func (s *Server) Log(format string, a ...interface{}) {
 	entry := fmt.Sprintf(format, a...)
 	entry = fmt.Sprintf(`%v: %v`, time.Now(), entry)
 	_, _ = s.log.Write([]byte(entry))
 }
 
-func LoadSettings(settingsFilePath string, logger io.Writer, environment string) (*Settings, error) {
-	settings := &Settings{log: logger, env: environment}
+func LoadServerFromSettings(settingsFilePath string, logger io.Writer, environment string) (*Server, error) {
+	settings := &Server{log: logger, env: environment}
 
 	content, err := os.ReadFile(settingsFilePath)
 	if err != nil {
@@ -65,7 +65,7 @@ func LoadSettings(settingsFilePath string, logger io.Writer, environment string)
 	return settings, err
 }
 
-func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
+func (s *Server) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 	fullPath := path.Join(s.ServeFolder, `index.html`)
 	content, err := os.ReadFile(fullPath)
 	if err != nil {
@@ -76,7 +76,7 @@ func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(200)
 }
 
-func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
 	fullPath := path.Join(s.ServeFolder, r.URL.Path)
 	content, err := os.ReadFile(fullPath)
 	if err != nil {
@@ -87,7 +87,7 @@ func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(200)
 }
 
-func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
+func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	var params CalcPayload
 	var langValue lang.Lang
 	var err error
@@ -114,7 +114,7 @@ func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	writeSuccess(w)
 }
 
-func (s *Settings) emailPlan(params CalcPayload, langValue lang.Lang) error {
+func (s *Server) emailPlan(params CalcPayload, langValue lang.Lang) error {
 	calc := calculator.InitializeCalculator(calculator.Inputs{
 		Arrival:         params.Arrival,
 		DepartureOffset: params.DepartureOffset,
@@ -147,7 +147,7 @@ func (s *Settings) emailPlan(params CalcPayload, langValue lang.Lang) error {
 
 const insert = `INSERT INTO API_USAGE (EXECUTED,DEPARTURE_OFFSET,ARRIVAL_OFFSET,ARRIVAL_TIME,LANG,DEPARTURE_LOC,ARRIVAL_LOC,WAKE,BREAKFAST,LUNCH,DINNER,SLEEP,ENVIRONMENT,ERRORS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
-func (s *Settings) insertApiRequest(params CalcPayload, langValue lang.Lang, handleErr error) error {
+func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handleErr error) error {
 	now := time.Now()
 	handleErrStr := ``
 	if handleErr != nil {

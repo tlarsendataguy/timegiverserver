@@ -16,7 +16,7 @@ func main() {
 	if err != nil {
 		return
 	}
-	settings, err := handlers.LoadSettings(`settings.json`, logger, `PROD`)
+	settings, err := handlers.LoadServerFromSettings(`settings.json`, logger, `PROD`)
 	if err != nil {
 		return
 	}
@@ -49,7 +49,7 @@ func main() {
 	settings.Log(err.Error())
 }
 
-func generateRouter(settings *handlers.Settings) *mux.Router {
+func generateRouter(settings *handlers.Server) *mux.Router {
 	e := mux.NewRouter()
 	e.HandleFunc(`/`, settings.HandleHomepage)
 	e.HandleFunc(`/api/calculate`, settings.HandleCalculateApi).Methods(`POST`)

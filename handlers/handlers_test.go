@@ -22,22 +22,22 @@ func (n *noWriter) Write(value []byte) (int, error) {
 }
 
 func TestLoadHandler(t *testing.T) {
-	settings, err := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, err := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
-	if value := settings.CertFolder; value != `./certs` {
+	if value := server.CertFolder; value != `./certs` {
 		t.Fatalf(`expected './certs' but got '%v'`, value)
 	}
-	if value := settings.ServeFolder; value != `./serveTest` {
+	if value := server.ServeFolder; value != `./serveTest` {
 		t.Fatalf(`expected './serveTest' but got '%v'`, value)
 	}
 }
 
 func TestLoadHomepage(t *testing.T) {
-	settings, _ := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
-	settings.HandleHomepage(w, nil)
+	server.HandleHomepage(w, nil)
 
 	err := checkResponse(w, 200, `./serveTest/index.html`)
 	if err != nil {
@@ -46,10 +46,10 @@ func TestLoadHomepage(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	settings, _ := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/scripts.js`)
-	settings.HandleFile(w, r)
+	server.HandleFile(w, r)
 
 	err := checkResponse(w, 200, `./serveTest/scripts.js`)
 	if err != nil {
@@ -58,8 +58,8 @@ func TestLoadFile(t *testing.T) {
 }
 
 func TestCalculateEmail(t *testing.T) {
-	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
-	settings, _ := LoadSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
+	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
+	server, _ := LoadServerFromSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
 	r.Method = `POST`
@@ -76,7 +76,7 @@ func TestCalculateEmail(t *testing.T) {
 	})
 	r.Body = io.NopCloser(bytes.NewReader(body))
 
-	settings.HandleCalculateApi(w, r)
+	server.HandleCalculateApi(w, r)
 	if w.status != 200 {
 		t.Log(string(w.content))
 		t.Fatalf(`expected 200 but got %v`, w.status)
@@ -84,8 +84,8 @@ func TestCalculateEmail(t *testing.T) {
 }
 
 func TestDb(t *testing.T) {
-	// t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked settings file be created with the necessary connection string`)
-	settings, err := LoadSettings(`conn_str.json`, &noWriter{}, `TEST`)
+	// t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked server file be created with the necessary connection string`)
+	server, err := LoadServerFromSettings(`conn_str.json`, &noWriter{}, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -100,7 +100,7 @@ func TestDb(t *testing.T) {
 		Dinner:          17 * time.Hour,
 		Sleep:           22 * time.Hour,
 	}
-	err = settings.insertApiRequest(params, lang.EN, nil)
+	err = server.insertApiRequest(params, lang.EN, nil)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
