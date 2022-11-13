@@ -5,9 +5,9 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/url"
+	"os"
 	"reflect"
 	"testing"
 	"time"
@@ -110,7 +110,7 @@ func checkResponse(w *testWriter, expectedStatus int, expectedFile string) error
 	if w.status != expectedStatus {
 		return fmt.Errorf(`expected status %v but got %v`, expectedStatus, w.status)
 	}
-	expected, _ := ioutil.ReadFile(expectedFile)
+	expected, _ := os.ReadFile(expectedFile)
 	if !reflect.DeepEqual(w.content, expected) {
 		return fmt.Errorf("expected %v content but got:\n%v", expectedFile, w.content)
 	}

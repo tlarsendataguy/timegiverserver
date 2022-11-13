@@ -7,9 +7,9 @@ import (
 	"github.com/jordan-wright/email"
 	_ "github.com/snowflakedb/gosnowflake"
 	"io"
-	"io/ioutil"
 	"net/http"
 	"net/smtp"
+	"os"
 	"path"
 	"strings"
 	"time"
@@ -46,7 +46,7 @@ func (s *Settings) Log(format string, a ...interface{}) {
 func LoadSettings(settingsFilePath string, logger io.Writer, environment string) (*Settings, error) {
 	settings := &Settings{log: logger, env: environment}
 
-	content, err := ioutil.ReadFile(settingsFilePath)
+	content, err := os.ReadFile(settingsFilePath)
 	if err != nil {
 		settings.Log(`error reading settings file: %v`, err.Error())
 		return nil, err
@@ -67,7 +67,7 @@ func LoadSettings(settingsFilePath string, logger io.Writer, environment string)
 
 func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 	fullPath := path.Join(s.ServeFolder, `index.html`)
-	content, err := ioutil.ReadFile(fullPath)
+	content, err := os.ReadFile(fullPath)
 	if err != nil {
 		w.WriteHeader(404)
 		return
@@ -78,7 +78,7 @@ func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 
 func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
 	fullPath := path.Join(s.ServeFolder, r.URL.Path)
-	content, err := ioutil.ReadFile(fullPath)
+	content, err := os.ReadFile(fullPath)
 	if err != nil {
 		w.WriteHeader(404)
 		return
