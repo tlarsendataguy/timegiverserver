@@ -2,18 +2,23 @@ package main
 
 import (
 	"crypto/tls"
-	"fmt"
 	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
+	"io/fs"
 	"net/http"
+	"os"
 	"time"
 	"timegiverserver/handlers"
 )
 
 func main() {
-	settings, err := handlers.LoadSettings(`settings.json`)
+	logger, err := os.OpenFile(`./Log.txt`, os.O_TRUNC, fs.ModePerm)
 	if err != nil {
-		println(fmt.Sprintf(`error loading settings: %v`, err.Error()))
+		return
+	}
+	settings, err := handlers.LoadSettings(`settings.json`, logger, `PROD`)
+	if err != nil {
+		return
 	}
 	e := generateRouter(settings)
 	m := &autocert.Manager{
@@ -38,10 +43,10 @@ func main() {
 	}
 	go func() {
 		redirectErr := serve.ListenAndServe()
-		println(redirectErr.Error())
+		settings.Log(redirectErr.Error())
 	}()
 	err = serveTls.ListenAndServeTLS(``, ``)
-	println(err.Error())
+	settings.Log(err.Error())
 }
 
 func generateRouter(settings *handlers.Settings) *mux.Router {

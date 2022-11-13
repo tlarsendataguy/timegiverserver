@@ -10,10 +10,19 @@ import (
 	"net/url"
 	"reflect"
 	"testing"
+	"time"
+	"timegiverserver/lang"
 )
 
+type noWriter struct {
+}
+
+func (n *noWriter) Write(value []byte) (int, error) {
+	return len(value), nil
+}
+
 func TestLoadHandler(t *testing.T) {
-	settings, err := LoadSettings(`settings.json`)
+	settings, err := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -26,7 +35,7 @@ func TestLoadHandler(t *testing.T) {
 }
 
 func TestLoadHomepage(t *testing.T) {
-	settings, _ := LoadSettings(`settings.json`)
+	settings, _ := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	settings.HandleHomepage(w, nil)
 
@@ -37,7 +46,7 @@ func TestLoadHomepage(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	settings, _ := LoadSettings(`settings.json`)
+	settings, _ := LoadSettings(`settings.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/scripts.js`)
 	settings.HandleFile(w, r)
@@ -49,8 +58,8 @@ func TestLoadFile(t *testing.T) {
 }
 
 func TestCalculateEmail(t *testing.T) {
-	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
-	settings, _ := LoadSettings(`smtp_auth.json`)
+	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked settings file be created with the necessary SMTP authorization fields`)
+	settings, _ := LoadSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
 	r.Method = `POST`
@@ -71,6 +80,29 @@ func TestCalculateEmail(t *testing.T) {
 	if w.status != 200 {
 		t.Log(string(w.content))
 		t.Fatalf(`expected 200 but got %v`, w.status)
+	}
+}
+
+func TestDb(t *testing.T) {
+	// t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked settings file be created with the necessary connection string`)
+	settings, err := LoadSettings(`conn_str.json`, &noWriter{}, `TEST`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	params := CalcPayload{
+		DepartureOffset: -4,
+		ArrivalOffset:   2,
+		Email:           "larsenthomasj@gmail.com",
+		Arrival:         time.Date(2022, 3, 4, 8, 30, 0, 0, time.UTC),
+		Wake:            6 * time.Hour,
+		Breakfast:       7 * time.Hour,
+		Lunch:           12 * time.Hour,
+		Dinner:          17 * time.Hour,
+		Sleep:           22 * time.Hour,
+	}
+	err = settings.insertApiRequest(params, lang.EN, nil)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
 }
 

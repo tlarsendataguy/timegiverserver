@@ -1,14 +1,18 @@
 package handlers
 
 import (
+	"database/sql"
 	"encoding/json"
 	"fmt"
 	"github.com/jordan-wright/email"
+	_ "github.com/snowflakedb/gosnowflake"
+	"io"
 	"io/ioutil"
 	"net/http"
 	"net/smtp"
 	"path"
 	"strings"
+	"time"
 	"timegiverserver/calculator"
 	"timegiverserver/lang"
 )
@@ -27,21 +31,38 @@ type Settings struct {
 	CertFolder  string
 	ServeFolder string
 	Emailer     Smtp
+	DbConnStr   string
+	Db          *sql.DB
+	log         io.Writer
+	env         string
 }
 
-func LoadSettings(settingsFilePath string) (*Settings, error) {
+func (s *Settings) Log(format string, a ...interface{}) {
+	entry := fmt.Sprintf(format, a...)
+	entry = fmt.Sprintf(`%v: %v`, time.Now(), entry)
+	_, _ = s.log.Write([]byte(entry))
+}
+
+func LoadSettings(settingsFilePath string, logger io.Writer, environment string) (*Settings, error) {
+	settings := &Settings{log: logger, env: environment}
+
 	content, err := ioutil.ReadFile(settingsFilePath)
 	if err != nil {
+		settings.Log(`error reading settings file: %v`, err.Error())
 		return nil, err
 	}
-	settings := &Settings{}
 	err = json.Unmarshal(content, settings)
 	if err != nil {
+		settings.Log(`error parsing settings file: %v`, err.Error())
 		return nil, err
 	}
 	settings.Emailer.Address = fmt.Sprintf(`%v:%v`, settings.Emailer.Host, settings.Emailer.Port)
 	settings.Emailer.Auth = smtp.PlainAuth(``, settings.Emailer.Username, settings.Emailer.Password, settings.Emailer.Host)
-	return settings, nil
+	if settings.DbConnStr != `` {
+		settings.Log(`persisting to Snowflake`)
+		settings.Db, err = sql.Open(`snowflake`, settings.DbConnStr)
+	}
+	return settings, err
 }
 
 func (s *Settings) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
@@ -67,8 +88,20 @@ func (s *Settings) HandleFile(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Settings) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
-	langValue := getLangFromRequest(r)
-	params, err := ValidateCalcPayload(r.Body)
+	var params CalcPayload
+	var langValue lang.Lang
+	var err error
+	if s.Db != nil {
+		defer func() {
+			insertErr := s.insertApiRequest(params, langValue, err)
+			if insertErr != nil {
+				s.Log(`error writing to Snowflake: %v`, insertErr.Error())
+			}
+		}()
+	}
+
+	langValue = getLangFromRequest(r)
+	params, err = ValidateCalcPayload(r.Body)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -110,6 +143,18 @@ func (s *Settings) emailPlan(params CalcPayload, langValue lang.Lang) error {
 		return err
 	}
 	return nil
+}
+
+const insert = `INSERT INTO API_USAGE (EXECUTED,DEPARTURE_OFFSET,ARRIVAL_OFFSET,ARRIVAL_TIME,LANG,DEPARTURE_LOC,ARRIVAL_LOC,WAKE,BREAKFAST,LUNCH,DINNER,SLEEP,ENVIRONMENT,ERRORS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+
+func (s *Settings) insertApiRequest(params CalcPayload, langValue lang.Lang, handleErr error) error {
+	now := time.Now()
+	handleErrStr := ``
+	if handleErr != nil {
+		handleErrStr = handleErr.Error()
+	}
+	_, err := s.Db.Exec(insert, now, params.DepartureOffset, params.ArrivalOffset, params.Arrival, langValue.String(), ``, ``, params.Wake, params.Breakfast, params.Lunch, params.Dinner, params.Sleep, s.env, handleErrStr)
+	return err
 }
 
 func writeError(w http.ResponseWriter, err error) {
