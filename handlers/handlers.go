@@ -83,7 +83,6 @@ func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	_, _ = w.Write(content)
-	w.WriteHeader(200)
 }
 
 func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
@@ -157,8 +156,8 @@ func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handl
 }
 
 func writeError(w http.ResponseWriter, err error) {
-	_, _ = w.Write([]byte(err.Error()))
 	w.WriteHeader(500)
+	_, _ = w.Write([]byte(err.Error()))
 }
 
 func writeSuccess(w http.ResponseWriter) {
