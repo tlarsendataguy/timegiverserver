@@ -7,10 +7,12 @@ import (
 	"github.com/jordan-wright/email"
 	_ "github.com/snowflakedb/gosnowflake"
 	"io"
+	"mime"
 	"net/http"
 	"net/smtp"
 	"os"
 	"path"
+	"path/filepath"
 	"strings"
 	"time"
 	"timegiverserver/calculator"
@@ -72,6 +74,7 @@ func (s *Server) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
+	w.Header().Add("Content-Type", `text/html`)
 	_, _ = w.Write(content)
 }
 
@@ -82,6 +85,8 @@ func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(404)
 		return
 	}
+	mimeType := mime.TypeByExtension(filepath.Ext(fullPath))
+	w.Header().Add("Content-Type", mimeType)
 	_, _ = w.Write(content)
 }
 

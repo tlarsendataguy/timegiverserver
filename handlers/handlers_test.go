@@ -128,13 +128,20 @@ func getRequestFor(testUrl string) *http.Request {
 type testWriter struct {
 	content []byte
 	status  int
+	header  http.Header
 }
 
 func (w *testWriter) Header() http.Header {
-	return nil
+	if w.header == nil {
+		w.header = make(http.Header)
+	}
+	return w.header
 }
 
 func (w *testWriter) Write(content []byte) (int, error) {
+	if w.status == 0 {
+		w.status = 200
+	}
 	if w.content == nil {
 		w.content = make([]byte, len(content))
 		copy(w.content, content)
