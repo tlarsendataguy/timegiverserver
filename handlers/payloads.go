@@ -104,3 +104,28 @@ func parseTime(value string) (time.Duration, error) {
 	}
 	return d, nil
 }
+
+type Coordinates struct {
+	Lat float64
+	Lng float64
+}
+
+type TimezoneRequestPayload struct {
+	Timestamp string
+	From      Coordinates
+	To        Coordinates
+}
+
+type TimezoneResponsePayload struct {
+	FromOffset float64
+	ToOffset   float64
+}
+
+type googleTimezoneResponse struct {
+	DstOffset float64 `json:"dstOffset"`
+	RawOffset float64 `json:"rawOffset"`
+}
+
+func (g *googleTimezoneResponse) Offset() float64 {
+	return (g.DstOffset + g.RawOffset) / 3600
+}

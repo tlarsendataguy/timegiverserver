@@ -35,6 +35,7 @@ type Server struct {
 	Emailer     Smtp
 	DbConnStr   string
 	Db          *sql.DB
+	MapsApiKey  string
 	log         io.Writer
 	env         string
 }
@@ -121,6 +122,66 @@ func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(ics))
 }
 
+func (s *Server) HandleTimezoneApi(w http.ResponseWriter, r *http.Request) {
+	var payload TimezoneRequestPayload
+	d := json.NewDecoder(r.Body)
+	err := d.Decode(&payload)
+	if err != nil {
+		writeErrorMsg(w, `JSON payload is invalid`)
+		return
+	}
+	timestamp, err := time.Parse(`2006-01-02T15:04`, payload.Timestamp)
+	if err != nil {
+		writeErrorMsg(w, `Timestamp is not formatted correctly`)
+		return
+	}
+
+	fromOffset, err := s.requestTimezone(payload.From, timestamp)
+	if err != nil {
+		writeErrorMsg(w, fmt.Sprintf(`error obtaining departure timezone: %v`, err.Error()))
+		return
+	}
+	toOffset, err := s.requestTimezone(payload.To, timestamp)
+	if err != nil {
+		writeErrorMsg(w, fmt.Sprintf(`error obtaining arrival timezone: %v`, err.Error()))
+		return
+	}
+
+	response := TimezoneResponsePayload{
+		FromOffset: fromOffset.Offset(),
+		ToOffset:   toOffset.Offset(),
+	}
+	responseBytes, err := json.Marshal(response)
+	if err != nil {
+		writeErrorMsg(w, `the server did not marshall the JSON correctly`)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	_, _ = w.Write(responseBytes)
+}
+
+func (s *Server) requestTimezone(coordinates Coordinates, timestamp time.Time) (*googleTimezoneResponse, error) {
+	url := s.buildTimezoneUrl(coordinates, timestamp)
+
+	response, err := http.Get(url)
+	if err != nil {
+		return nil, err
+	}
+	googleResponse := &googleTimezoneResponse{}
+	d := json.NewDecoder(response.Body)
+	err = d.Decode(googleResponse)
+	_ = response.Body.Close()
+	if err != nil {
+		return nil, err
+	}
+	return googleResponse, nil
+}
+
+func (s *Server) buildTimezoneUrl(coords Coordinates, timestamp time.Time) string {
+	return fmt.Sprintf(`https://maps.googleapis.com/maps/api/timezone/json?location=%v%%2C%v&timestamp=%v&key=%v`, coords.Lat, coords.Lng, timestamp.Unix(), s.MapsApiKey)
+}
+
 func (s *Server) generateIcs(params CalcPayload, langValue lang.Lang) string {
 	calc := calculator.InitializeCalculator(calculator.Inputs{
 		Arrival:         params.Arrival,
@@ -168,8 +229,12 @@ func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handl
 }
 
 func writeError(w http.ResponseWriter, err error) {
+	writeErrorMsg(w, err.Error())
+}
+
+func writeErrorMsg(w http.ResponseWriter, msg string) {
 	w.WriteHeader(500)
-	_, _ = w.Write([]byte(err.Error()))
+	_, _ = w.Write([]byte(msg))
 }
 
 func getLangFromRequest(r *http.Request) lang.Lang {

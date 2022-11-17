@@ -54,6 +54,7 @@ func generateRouter(settings *handlers.Server) *mux.Router {
 	e := mux.NewRouter()
 	e.HandleFunc(`/`, settings.HandleHomepage)
 	e.HandleFunc(`/api/calculate`, settings.HandleCalculateApi).Methods(`POST`)
+	e.HandleFunc(`/api/timezones`, settings.HandleTimezoneApi).Methods(`POST`)
 	e.PathPrefix(`/`).HandlerFunc(settings.HandleFile).Methods(`GET`)
 	return e
 }

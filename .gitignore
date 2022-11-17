@@ -2,4 +2,5 @@
 *.ics
 handlers/smtp_auth.json
 handlers/conn_str.json
+handlers/maps_api.json
 timegiverserver.exe

@@ -58,7 +58,7 @@ func TestLoadFile(t *testing.T) {
 }
 
 func TestCalculateEmail(t *testing.T) {
-	// t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
+	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
 	server, _ := LoadServerFromSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
@@ -84,7 +84,7 @@ func TestCalculateEmail(t *testing.T) {
 }
 
 func TestDb(t *testing.T) {
-	// t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked server file be created with the necessary connection string`)
+	t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked server file be created with the necessary connection string`)
 	server, err := LoadServerFromSettings(`conn_str.json`, &noWriter{}, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
@@ -103,6 +103,35 @@ func TestDb(t *testing.T) {
 	err = server.insertApiRequest(params, lang.EN, nil)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+}
+
+func TestTimezoneApi(t *testing.T) {
+	// t.Skip(`Skipped by default. This test calls the Google Maps Timezone API`)
+	server, err := LoadServerFromSettings(`maps_api.json`, &noWriter{}, `TEST`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	w := &testWriter{}
+	r := getRequestFor(`https://www.timegiver.app/api/timezones`)
+	r.Method = `POST`
+	body, _ := json.Marshal(TimezoneRequestPayload{
+		Timestamp: `2022-01-02T03:04`,
+		From: Coordinates{
+			Lat: 35.77664880968805,
+			Lng: -78.64098235711558,
+		},
+		To: Coordinates{
+			Lat: 51.51045976704988,
+			Lng: -0.12275095972896906,
+		},
+	})
+	r.Body = io.NopCloser(bytes.NewReader(body))
+
+	server.HandleTimezoneApi(w, r)
+	t.Log(string(w.content))
+	if w.status != 200 {
+		t.Fatalf(`expected 200 but got %v`, w.status)
 	}
 }
 
