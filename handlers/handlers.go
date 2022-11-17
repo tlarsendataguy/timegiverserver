@@ -109,15 +109,19 @@ func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 		writeError(w, err)
 		return
 	}
-	err = s.emailPlan(params, langValue)
-	if err != nil {
-		writeError(w, err)
-		return
+	ics := s.generateIcs(params, langValue)
+	if to := params.Email; to != `` {
+		err = s.emailPlan(ics, to)
+		if err != nil {
+			writeError(w, err)
+			return
+		}
 	}
-	writeSuccess(w)
+	w.Header().Add("Content-Type", "text/calendar")
+	_, _ = w.Write([]byte(ics))
 }
 
-func (s *Server) emailPlan(params CalcPayload, langValue lang.Lang) error {
+func (s *Server) generateIcs(params CalcPayload, langValue lang.Lang) string {
 	calc := calculator.InitializeCalculator(calculator.Inputs{
 		Arrival:         params.Arrival,
 		DepartureOffset: params.DepartureOffset,
@@ -131,10 +135,13 @@ func (s *Server) emailPlan(params CalcPayload, langValue lang.Lang) error {
 		},
 	})
 	steps := calc.Plan()
-	ics := calculator.BuildIcsFile(steps, langValue)
+	return calculator.BuildIcsFile(steps, langValue)
+}
+
+func (s *Server) emailPlan(ics string, to string) error {
 	e := email.NewEmail()
 	e.From = s.Emailer.From
-	e.To = []string{params.Email}
+	e.To = []string{to}
 	e.Subject = `Timegiver Plan`
 	e.Text = []byte("Attached is your Timegiver plan to beat jet lag on your upcoming trip!\n\n")
 	_, err := e.Attach(strings.NewReader(ics), `plan.ics`, `text/calendar`)
@@ -163,10 +170,6 @@ func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handl
 func writeError(w http.ResponseWriter, err error) {
 	w.WriteHeader(500)
 	_, _ = w.Write([]byte(err.Error()))
-}
-
-func writeSuccess(w http.ResponseWriter) {
-	w.WriteHeader(200)
 }
 
 func getLangFromRequest(r *http.Request) lang.Lang {

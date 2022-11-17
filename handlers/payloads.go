@@ -42,8 +42,10 @@ func ValidateCalcPayload(r io.Reader) (CalcPayload, error) {
 	if err != nil {
 		return CalcPayload{}, errors.New(`invalid JSON`)
 	}
-	if _, emailErr := mail.ParseAddress(payload.Email); emailErr != nil {
-		return CalcPayload{}, errors.New(`a valid e-mail address was not provided`)
+	if payload.Email != `` {
+		if _, emailErr := mail.ParseAddress(payload.Email); emailErr != nil {
+			return CalcPayload{}, errors.New(`a valid e-mail address was not provided`)
+		}
 	}
 	if math.Trunc(payload.DepartureOffset) == math.Trunc(payload.ArrivalOffset) {
 		return CalcPayload{}, errors.New(`no plan is needed when departure offset is equivalent to arrival offset`)
@@ -55,7 +57,7 @@ func ValidateCalcPayload(r io.Reader) (CalcPayload, error) {
 		Email:           payload.Email,
 	}
 
-	output.Arrival, err = time.Parse(`20060102T150405`, payload.Arrival)
+	output.Arrival, err = time.Parse(`2006-01-02T15:04`, payload.Arrival)
 	if err != nil {
 		return CalcPayload{}, errors.New(`invalid date provided for Arrival`)
 	}

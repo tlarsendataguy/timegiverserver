@@ -67,7 +67,7 @@ func TestCalculateEmail(t *testing.T) {
 		DepartureOffset: -4,
 		ArrivalOffset:   2,
 		Email:           "larsenthomasj@gmail.com",
-		Arrival:         `20220304T083000`,
+		Arrival:         `2020-03-04T08:30`,
 		Wake:            `06:00`,
 		Breakfast:       `07:00`,
 		Lunch:           `12:00`,
