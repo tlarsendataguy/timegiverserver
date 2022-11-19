@@ -57,6 +57,18 @@ func TestLoadFile(t *testing.T) {
 	}
 }
 
+func Test404Response(t *testing.T) {
+	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
+	w := &testWriter{}
+	r := getRequestFor(`https://www.timegiver.app/invalid_file`)
+	server.HandleFile(w, r)
+
+	err := checkResponse(w, 404, `./serveTest/404.html`)
+	if err != nil {
+		t.Fatalf(err.Error())
+	}
+}
+
 func TestCalculateEmail(t *testing.T) {
 	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
 	server, _ := LoadServerFromSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
@@ -107,7 +119,7 @@ func TestDb(t *testing.T) {
 }
 
 func TestTimezoneApi(t *testing.T) {
-	// t.Skip(`Skipped by default. This test calls the Google Maps Timezone API`)
+	t.Skip(`Skipped by default. This test calls the Google Maps Timezone API`)
 	server, err := LoadServerFromSettings(`maps_api.json`, &noWriter{}, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())

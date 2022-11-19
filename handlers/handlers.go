@@ -83,7 +83,9 @@ func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
 	fullPath := path.Join(s.ServeFolder, r.URL.Path)
 	content, err := os.ReadFile(fullPath)
 	if err != nil {
+		err404, _ := os.ReadFile(path.Join(s.ServeFolder, `404.html`))
 		w.WriteHeader(404)
+		_, _ = w.Write(err404)
 		return
 	}
 	mimeType := mime.TypeByExtension(filepath.Ext(fullPath))
