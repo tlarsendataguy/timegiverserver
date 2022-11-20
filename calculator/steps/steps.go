@@ -60,6 +60,14 @@ func writeTexts(s *strings.Builder, texts localization.StepText) {
 	s.Write([]byte("\r\n"))
 }
 
+func writeAlarm(s *strings.Builder, texts localization.StepText) {
+	s.Write([]byte("BEGIN:VALARM\r\n"))
+	s.Write([]byte("TRIGGER;RELATED=START:PT0M\r\n"))
+	s.Write([]byte("ACTION:DISPLAY\r\n"))
+	wrap(s, "DESCRIPTION:", texts.Title)
+	s.Write([]byte("\r\nEND:VALARM\r\n"))
+}
+
 func endEvent(s *strings.Builder) {
 	s.Write([]byte("CATEGORIES:TimeGiver\r\n"))
 	s.Write([]byte("END:VEVENT\r\n"))
@@ -70,6 +78,7 @@ func buildIcs(builder *strings.Builder, stepId string, texts localization.StepTe
 	writeUid(builder, start, stepId)
 	writeDates(builder, start, end)
 	writeTexts(builder, texts)
+	writeAlarm(builder, texts)
 	endEvent(builder)
 }
 

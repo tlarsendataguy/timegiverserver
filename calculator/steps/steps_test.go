@@ -49,7 +49,7 @@ func getIcsString(step Step, lang lang.Lang) string {
 
 func TestNoCaffeineToIcs(t *testing.T) {
 	ics := getIcsString(NoCaffeine{Start: start, End: end}, lang.EN)
-	expected := "BEGIN:VEVENT\r\nUID:20220102T030000ZNoCaffeine@timegiver.app\r\nDTSTAMP:20220102T030000Z\r\nDTSTART:20220102T030000Z\r\nDTEND:20220102T043000Z\r\nSUMMARY:No caffeine\r\nDESCRIPTION:Refrain from consuming caffeine.  In addition to coffee and tea\r\n , caffeine may also be present in soft drinks and chocolate.\r\nCATEGORIES:TimeGiver\r\nEND:VEVENT\r\n"
+	expected := "BEGIN:VEVENT\r\nUID:20220102T030000ZNoCaffeine@timegiver.app\r\nDTSTAMP:20220102T030000Z\r\nDTSTART:20220102T030000Z\r\nDTEND:20220102T043000Z\r\nSUMMARY:No caffeine\r\nDESCRIPTION:Refrain from consuming caffeine.  In addition to coffee and tea\r\n , caffeine may also be present in soft drinks and chocolate.\r\nBEGIN:VALARM\r\nTRIGGER;RELATED=START:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:No caffeine\r\nEND:VALARM\r\nCATEGORIES:TimeGiver\r\nEND:VEVENT\r\n"
 	if ics != expected {
 		t.Fatalf("expected\n\n%v\n\nbut got\n\n%v", expected, ics)
 	}

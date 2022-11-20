@@ -207,7 +207,7 @@ func (s *Server) emailPlan(ics string, to string) error {
 	e.To = []string{to}
 	e.Subject = `Timegiver Plan`
 	e.Text = []byte("Attached is your Timegiver plan to beat jet lag on your upcoming trip!\n\n")
-	_, err := e.Attach(strings.NewReader(ics), `plan.ics`, `text/calendar`)
+	_, err := e.Attach(strings.NewReader(ics), `Timegiver Plan.ics`, `text/calendar`)
 	if err != nil {
 		return err
 	}
