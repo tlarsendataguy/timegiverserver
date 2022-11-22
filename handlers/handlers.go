@@ -42,7 +42,7 @@ type Server struct {
 
 func (s *Server) Log(format string, a ...interface{}) {
 	entry := fmt.Sprintf(format, a...)
-	entry = fmt.Sprintf(`%v: %v`, time.Now(), entry)
+	entry = fmt.Sprintf("%v: %v\n", time.Now().Format(`2006-01-02 15:04:05`), entry)
 	_, _ = s.log.Write([]byte(entry))
 }
 
@@ -64,6 +64,7 @@ func LoadServerFromSettings(settingsFilePath string, logger io.Writer, environme
 	if settings.DbConnStr != `` {
 		settings.Log(`persisting to Snowflake`)
 		settings.Db, err = sql.Open(`snowflake`, settings.DbConnStr)
+		go settings.keepSnowflakeAlive()
 	}
 	return settings, err
 }
@@ -228,6 +229,18 @@ func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handl
 	}
 	_, err := s.Db.Exec(insert, now, params.DepartureOffset, params.ArrivalOffset, params.Arrival, langValue.String(), params.DepartureLoc, params.ArrivalLoc, params.Wake, params.Breakfast, params.Lunch, params.Dinner, params.Sleep, s.env, handleErrStr)
 	return err
+}
+
+func (s *Server) keepSnowflakeAlive() {
+	for {
+		time.Sleep(1 * time.Hour)
+		rows, err := s.Db.Query(`SELECT 1`)
+		if err != nil {
+			s.Log(err.Error())
+			continue
+		}
+		_ = rows.Close()
+	}
 }
 
 func writeError(w http.ResponseWriter, err error) {
