@@ -104,6 +104,8 @@ func TestDb(t *testing.T) {
 	params := CalcPayload{
 		DepartureOffset: -4,
 		ArrivalOffset:   2,
+		DepartureLoc:    `Raleigh, NC`,
+		ArrivalLoc:      `Krakow, PL`,
 		Email:           "larsenthomasj@gmail.com",
 		Arrival:         time.Date(2022, 3, 4, 8, 30, 0, 0, time.UTC),
 		Wake:            6 * time.Hour,

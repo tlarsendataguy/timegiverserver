@@ -226,7 +226,7 @@ func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handl
 	if handleErr != nil {
 		handleErrStr = handleErr.Error()
 	}
-	_, err := s.Db.Exec(insert, now, params.DepartureOffset, params.ArrivalOffset, params.Arrival, langValue.String(), ``, ``, params.Wake, params.Breakfast, params.Lunch, params.Dinner, params.Sleep, s.env, handleErrStr)
+	_, err := s.Db.Exec(insert, now, params.DepartureOffset, params.ArrivalOffset, params.Arrival, langValue.String(), params.DepartureLoc, params.ArrivalLoc, params.Wake, params.Breakfast, params.Lunch, params.Dinner, params.Sleep, s.env, handleErrStr)
 	return err
 }
 

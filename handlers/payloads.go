@@ -15,6 +15,8 @@ type CalcPayload struct {
 	DepartureOffset float64
 	ArrivalOffset   float64
 	Email           string
+	DepartureLoc    string
+	ArrivalLoc      string
 	Arrival         time.Time
 	Wake            time.Duration
 	Breakfast       time.Duration
@@ -26,6 +28,8 @@ type CalcPayload struct {
 type tempPayload struct {
 	DepartureOffset float64
 	ArrivalOffset   float64
+	DepartureLoc    string
+	ArrivalLoc      string
 	Email           string
 	Arrival         string
 	Wake            string
@@ -52,7 +56,9 @@ func ValidateCalcPayload(r io.Reader) (CalcPayload, error) {
 	}
 
 	output := CalcPayload{
+		DepartureLoc:    payload.DepartureLoc,
 		DepartureOffset: payload.DepartureOffset,
+		ArrivalLoc:      payload.ArrivalLoc,
 		ArrivalOffset:   payload.ArrivalOffset,
 		Email:           payload.Email,
 	}
