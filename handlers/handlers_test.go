@@ -14,15 +14,8 @@ import (
 	"timegiverserver/lang"
 )
 
-type noWriter struct {
-}
-
-func (n *noWriter) Write(value []byte) (int, error) {
-	return len(value), nil
-}
-
 func TestLoadHandler(t *testing.T) {
-	server, err := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -35,7 +28,7 @@ func TestLoadHandler(t *testing.T) {
 }
 
 func TestLoadHomepage(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
 	w := &testWriter{}
 	server.HandleHomepage(w, nil)
 
@@ -46,7 +39,7 @@ func TestLoadHomepage(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/scripts.js`)
 	server.HandleFile(w, r)
@@ -58,7 +51,7 @@ func TestLoadFile(t *testing.T) {
 }
 
 func Test404Response(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/invalid_file`)
 	server.HandleFile(w, r)
@@ -71,7 +64,7 @@ func Test404Response(t *testing.T) {
 
 func TestCalculateEmail(t *testing.T) {
 	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
-	server, _ := LoadServerFromSettings(`smtp_auth.json`, &noWriter{}, `TEST`)
+	server, _ := LoadServerFromSettings(`smtp_auth.json`, `TEST`)
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
 	r.Method = `POST`
@@ -97,7 +90,7 @@ func TestCalculateEmail(t *testing.T) {
 
 func TestDb(t *testing.T) {
 	t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked server file be created with the necessary connection string`)
-	server, err := LoadServerFromSettings(`conn_str.json`, &noWriter{}, `TEST`)
+	server, err := LoadServerFromSettings(`conn_str.json`, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -122,7 +115,7 @@ func TestDb(t *testing.T) {
 
 func TestTimezoneApi(t *testing.T) {
 	t.Skip(`Skipped by default. This test calls the Google Maps Timezone API`)
-	server, err := LoadServerFromSettings(`maps_api.json`, &noWriter{}, `TEST`)
+	server, err := LoadServerFromSettings(`maps_api.json`, `TEST`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}

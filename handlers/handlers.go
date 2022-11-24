@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"github.com/jordan-wright/email"
 	_ "github.com/snowflakedb/gosnowflake"
-	"io"
+	"log"
 	"mime"
 	"net/http"
 	"net/smtp"
@@ -36,33 +36,26 @@ type Server struct {
 	DbConnStr   string
 	Db          *sql.DB
 	MapsApiKey  string
-	log         io.Writer
 	env         string
 }
 
-func (s *Server) Log(format string, a ...interface{}) {
-	entry := fmt.Sprintf(format, a...)
-	entry = fmt.Sprintf("%v: %v\n", time.Now().Format(`2006-01-02 15:04:05`), entry)
-	_, _ = s.log.Write([]byte(entry))
-}
-
-func LoadServerFromSettings(settingsFilePath string, logger io.Writer, environment string) (*Server, error) {
-	settings := &Server{log: logger, env: environment}
+func LoadServerFromSettings(settingsFilePath string, environment string) (*Server, error) {
+	settings := &Server{env: environment}
 
 	content, err := os.ReadFile(settingsFilePath)
 	if err != nil {
-		settings.Log(`error reading settings file: %v`, err.Error())
+		log.Printf(`error reading settings file: %v`, err.Error())
 		return nil, err
 	}
 	err = json.Unmarshal(content, settings)
 	if err != nil {
-		settings.Log(`error parsing settings file: %v`, err.Error())
+		log.Printf(`error parsing settings file: %v`, err.Error())
 		return nil, err
 	}
 	settings.Emailer.Address = fmt.Sprintf(`%v:%v`, settings.Emailer.Host, settings.Emailer.Port)
 	settings.Emailer.Auth = smtp.PlainAuth(``, settings.Emailer.Username, settings.Emailer.Password, settings.Emailer.Host)
 	if settings.DbConnStr != `` {
-		settings.Log(`persisting to Snowflake`)
+		log.Printf(`persisting to Snowflake`)
 		settings.Db, err = sql.Open(`snowflake`, settings.DbConnStr)
 		go settings.keepSnowflakeAlive()
 	}
@@ -102,7 +95,7 @@ func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 		defer func() {
 			insertErr := s.insertApiRequest(params, langValue, err)
 			if insertErr != nil {
-				s.Log(`error writing to Snowflake: %v`, insertErr.Error())
+				log.Printf(`error writing to Snowflake: %v`, insertErr.Error())
 			}
 		}()
 	}
@@ -236,7 +229,7 @@ func (s *Server) keepSnowflakeAlive() {
 		time.Sleep(1 * time.Hour)
 		rows, err := s.Db.Query(`SELECT 1`)
 		if err != nil {
-			s.Log(err.Error())
+			log.Printf(err.Error())
 			continue
 		}
 		_ = rows.Close()
