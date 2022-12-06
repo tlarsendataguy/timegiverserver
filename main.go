@@ -2,7 +2,6 @@ package main
 
 import (
 	"crypto/tls"
-	"github.com/gorilla/mux"
 	"golang.org/x/crypto/acme/autocert"
 	"log"
 	"net/http"
@@ -15,11 +14,11 @@ func main() {
 	if err != nil {
 		return
 	}
-	e := generateRouter(settings)
+	e := settings.GenerateRouter()
 	m := &autocert.Manager{
 		Prompt:     autocert.AcceptTOS,
 		Cache:      autocert.DirCache(settings.CertFolder),
-		HostPolicy: autocert.HostWhitelist(`timegiver.app`, `www.timegiver.app`),
+		HostPolicy: autocert.HostWhitelist(settings.CollectHostWhitelist()...),
 	}
 	serveTls := &http.Server{
 		Addr:         `:443`,
@@ -42,13 +41,4 @@ func main() {
 	}()
 	err = serveTls.ListenAndServeTLS(``, ``)
 	log.Printf(err.Error())
-}
-
-func generateRouter(settings *handlers.Server) *mux.Router {
-	e := mux.NewRouter()
-	e.HandleFunc(`/`, settings.HandleHomepage)
-	e.HandleFunc(`/api/calculate`, settings.HandleCalculateApi).Methods(`POST`)
-	e.HandleFunc(`/api/timezones`, settings.HandleTimezoneApi).Methods(`POST`)
-	e.PathPrefix(`/`).HandlerFunc(settings.HandleFile).Methods(`GET`)
-	return e
 }

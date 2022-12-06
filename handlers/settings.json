@@ -1,4 +1,17 @@
 {
   "CertFolder": "./certs",
-  "ServeFolder": "./serveTest"
+  "ServeFolder": "./serveTest",
+  "Hosts": [
+    {
+      "Folder": "host1",
+      "HostWhitelist": ["host1.com","www.host1.com"],
+      "AllowTimezonesApi": true,
+      "AllowCalculateApi": true
+    },
+    {
+      "Folder": "host2",
+      "HostWhitelist": ["something.somewhere.com"],
+      "AllowTimezonesApi": false
+    }
+  ]
 }

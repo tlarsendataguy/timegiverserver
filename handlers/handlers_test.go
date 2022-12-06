@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"io"
 	"net/http"
 	"net/url"
@@ -29,10 +30,12 @@ func TestLoadHandler(t *testing.T) {
 
 func TestLoadHomepage(t *testing.T) {
 	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	router := server.GenerateRouter()
 	w := &testWriter{}
-	server.HandleHomepage(w, nil)
+	r := getRequestFor(`https://www.host1.com/`)
+	router.ServeHTTP(w, r)
 
-	err := checkResponse(w, 200, `./serveTest/index.html`)
+	err := checkResponse(w, 200, `./serveTest/host1/index.html`)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -40,11 +43,12 @@ func TestLoadHomepage(t *testing.T) {
 
 func TestLoadFile(t *testing.T) {
 	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	router := server.GenerateRouter()
 	w := &testWriter{}
-	r := getRequestFor(`https://www.timegiver.app/scripts.js`)
-	server.HandleFile(w, r)
+	r := getRequestFor(`https://www.host1.com/scripts.js`)
+	router.ServeHTTP(w, r)
 
-	err := checkResponse(w, 200, `./serveTest/scripts.js`)
+	err := checkResponse(w, 200, `./serveTest/host1/scripts.js`)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -52,11 +56,12 @@ func TestLoadFile(t *testing.T) {
 
 func Test404Response(t *testing.T) {
 	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	router := server.GenerateRouter()
 	w := &testWriter{}
-	r := getRequestFor(`https://www.timegiver.app/invalid_file`)
-	server.HandleFile(w, r)
+	r := getRequestFor(`https://www.host1.com/invalid_file`)
+	router.ServeHTTP(w, r)
 
-	err := checkResponse(w, 404, `./serveTest/404.html`)
+	err := checkResponse(w, 404, `./serveTest/host1/404.html`)
 	if err != nil {
 		t.Fatalf(err.Error())
 	}
@@ -65,8 +70,9 @@ func Test404Response(t *testing.T) {
 func TestCalculateEmail(t *testing.T) {
 	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
 	server, _ := LoadServerFromSettings(`smtp_auth.json`, `TEST`)
+	router := server.GenerateRouter()
 	w := &testWriter{}
-	r := getRequestFor(`https://www.timegiver.app/api/calculate`)
+	r := getRequestFor(`https://www.host1.com/api/calculate`)
 	r.Method = `POST`
 	body, _ := json.Marshal(tempPayload{
 		DepartureOffset: -4,
@@ -81,7 +87,7 @@ func TestCalculateEmail(t *testing.T) {
 	})
 	r.Body = io.NopCloser(bytes.NewReader(body))
 
-	server.HandleCalculateApi(w, r)
+	router.ServeHTTP(w, r)
 	if w.status != 200 {
 		t.Log(string(w.content))
 		t.Fatalf(`expected 200 but got %v`, w.status)
@@ -119,6 +125,7 @@ func TestTimezoneApi(t *testing.T) {
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
+	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://www.timegiver.app/api/timezones`)
 	r.Method = `POST`
@@ -135,11 +142,87 @@ func TestTimezoneApi(t *testing.T) {
 	})
 	r.Body = io.NopCloser(bytes.NewReader(body))
 
-	server.HandleTimezoneApi(w, r)
+	router.ServeHTTP(w, r)
 	t.Log(string(w.content))
 	if w.status != 200 {
 		t.Fatalf(`expected 200 but got %v`, w.status)
 	}
+}
+
+func TestHostWhitelist(t *testing.T) {
+	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	whitelist := server.CollectHostWhitelist()
+	expected := []string{"host1.com", "www.host1.com", "something.somewhere.com"}
+	if !reflect.DeepEqual(whitelist, expected) {
+		t.Fatalf(`expected %v but got %v`, expected, whitelist)
+	}
+}
+
+func TestRouter(t *testing.T) {
+	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	router := server.GenerateRouter()
+	if err = checkRoute(router, `https://www.host1.com/`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkRoute(router, `https://www.host1.com/index.html`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkApiRoute(router, `https://www.host1.com/api/timezones`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkApiRoute(router, `https://www.host1.com/api/calculate`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkRoute(router, `https://host1.com/`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkApiRoute(router, `https://host1.com/api/timezones`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkApiRoute(router, `https://host1.com/api/calculate`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkRoute(router, `https://host1.com/index.html`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkRoute(router, `https://something.somewhere.com/`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkRoute(router, `https://something.somewhere.com/index.html`); err != nil {
+		t.Fatalf(err.Error())
+	}
+	if err = checkApiRoute(router, `https://something.somewhere.com/api/timezones`); err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(err.Error())
+	if err = checkApiRoute(router, `https://something.somewhere.com/api/calculate`); err == nil {
+		t.Fatalf(`expected an error but got none`)
+	}
+	t.Logf(err.Error())
+}
+
+func checkRoute(router *mux.Router, url string) error {
+	match := &mux.RouteMatch{}
+	r := getRequestFor(url)
+	if success := router.Match(r, match); !success {
+		return match.MatchErr
+	}
+	return nil
+}
+
+func checkApiRoute(router *mux.Router, url string) error {
+	match := &mux.RouteMatch{}
+	r := requestFor(url, `POST`)
+	if success := router.Match(r, match); !success {
+		return match.MatchErr
+	}
+	return nil
 }
 
 func checkResponse(w *testWriter, expectedStatus int, expectedFile string) error {
@@ -154,9 +237,13 @@ func checkResponse(w *testWriter, expectedStatus int, expectedFile string) error
 }
 
 func getRequestFor(testUrl string) *http.Request {
+	return requestFor(testUrl, `GET`)
+}
+
+func requestFor(testUrl string, method string) *http.Request {
 	u, _ := url.Parse(testUrl)
 	return &http.Request{
-		Method: "GET",
+		Method: method,
 		URL:    u,
 	}
 }

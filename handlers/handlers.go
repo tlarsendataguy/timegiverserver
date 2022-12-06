@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"github.com/jordan-wright/email"
 	_ "github.com/snowflakedb/gosnowflake"
 	"log"
@@ -29,6 +30,13 @@ type Smtp struct {
 	Auth     smtp.Auth
 }
 
+type HostInfo struct {
+	Folder            string
+	HostWhitelist     []string
+	AllowTimezonesApi bool
+	AllowCalculateApi bool
+}
+
 type Server struct {
 	CertFolder  string
 	ServeFolder string
@@ -36,6 +44,7 @@ type Server struct {
 	DbConnStr   string
 	Db          *sql.DB
 	MapsApiKey  string
+	Hosts       []HostInfo
 	env         string
 }
 
@@ -62,32 +71,36 @@ func LoadServerFromSettings(settingsFilePath string, environment string) (*Serve
 	return settings, err
 }
 
-func (s *Server) HandleHomepage(w http.ResponseWriter, _ *http.Request) {
-	fullPath := path.Join(s.ServeFolder, `index.html`)
-	content, err := os.ReadFile(fullPath)
-	if err != nil {
-		w.WriteHeader(404)
-		return
+func (s *Server) homepageHandler(hostFolder string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fullPath := path.Join(s.ServeFolder, hostFolder, `index.html`)
+		content, err := os.ReadFile(fullPath)
+		if err != nil {
+			w.WriteHeader(404)
+			return
+		}
+		w.Header().Add("Content-Type", `text/html`)
+		_, _ = w.Write(content)
 	}
-	w.Header().Add("Content-Type", `text/html`)
-	_, _ = w.Write(content)
 }
 
-func (s *Server) HandleFile(w http.ResponseWriter, r *http.Request) {
-	fullPath := path.Join(s.ServeFolder, r.URL.Path)
-	content, err := os.ReadFile(fullPath)
-	if err != nil {
-		err404, _ := os.ReadFile(path.Join(s.ServeFolder, `404.html`))
-		w.WriteHeader(404)
-		_, _ = w.Write(err404)
-		return
+func (s *Server) fileHandler(hostFolder string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, r *http.Request) {
+		fullPath := path.Join(s.ServeFolder, hostFolder, r.URL.Path)
+		content, err := os.ReadFile(fullPath)
+		if err != nil {
+			err404, _ := os.ReadFile(path.Join(s.ServeFolder, hostFolder, `404.html`))
+			w.WriteHeader(404)
+			_, _ = w.Write(err404)
+			return
+		}
+		mimeType := mime.TypeByExtension(filepath.Ext(fullPath))
+		w.Header().Add("Content-Type", mimeType)
+		_, _ = w.Write(content)
 	}
-	mimeType := mime.TypeByExtension(filepath.Ext(fullPath))
-	w.Header().Add("Content-Type", mimeType)
-	_, _ = w.Write(content)
 }
 
-func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	var params CalcPayload
 	var langValue lang.Lang
 	var err error
@@ -118,7 +131,7 @@ func (s *Server) HandleCalculateApi(w http.ResponseWriter, r *http.Request) {
 	_, _ = w.Write([]byte(ics))
 }
 
-func (s *Server) HandleTimezoneApi(w http.ResponseWriter, r *http.Request) {
+func (s *Server) handleTimezoneApi(w http.ResponseWriter, r *http.Request) {
 	var payload TimezoneRequestPayload
 	d := json.NewDecoder(r.Body)
 	err := d.Decode(&payload)
@@ -155,6 +168,35 @@ func (s *Server) HandleTimezoneApi(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	_, _ = w.Write(responseBytes)
+}
+
+func (s *Server) CollectHostWhitelist() []string {
+	whitelist := make([]string, 0, 10)
+	for _, hosts := range s.Hosts {
+		whitelist = append(whitelist, hosts.HostWhitelist...)
+	}
+	return whitelist
+}
+
+func (s *Server) GenerateRouter() *mux.Router {
+	e := mux.NewRouter()
+
+	for _, info := range s.Hosts {
+		for _, host := range info.HostWhitelist {
+			sub := e.Host(host).Subrouter()
+			sub.Path(`/`).HandlerFunc(s.homepageHandler(info.Folder))
+
+			if info.AllowCalculateApi {
+				sub.Path(`/api/calculate`).Methods(`POST`).HandlerFunc(s.handleCalculateApi)
+			}
+			if info.AllowTimezonesApi {
+				sub.Path(`/api/timezones`).Methods(`POST`).HandlerFunc(s.handleTimezoneApi)
+			}
+			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
+		}
+	}
+
+	return e
 }
 
 func (s *Server) requestTimezone(coordinates Coordinates, timestamp time.Time) (*googleTimezoneResponse, error) {
