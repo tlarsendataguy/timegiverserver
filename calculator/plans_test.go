@@ -2,9 +2,12 @@ package calculator
 
 import (
 	"fmt"
+	"os"
+	"path"
 	"testing"
 	"time"
 	"timegiverserver/calculator/steps"
+	"timegiverserver/lang"
 )
 
 var arrival = time.Date(2017, 1, 15, 12, 0, 0, 0, time.UTC)
@@ -1121,6 +1124,33 @@ func TestWest910(t *testing.T) {
 	}
 	if err := checkArrive(plan[31], `2017-01-15 22:00`); err != nil {
 		t.Fatal(err.Error())
+	}
+}
+
+func TestGenerateBatchIcs(t *testing.T) {
+	folder := `./testing_batches`
+	i := 1.0
+	eastStart := -7.0
+	westStart := 11.0
+	for i < 14 {
+		eastEnd := eastStart + i
+		westEnd := westStart - i
+
+		eastPlan := generatePlan(eastStart, eastEnd)
+		westPlan := generatePlan(westStart, westEnd)
+
+		eastFile := fmt.Sprintf(`East %v.ics`, i)
+		westFile := fmt.Sprintf(`West %v.ics`, i)
+
+		err := os.WriteFile(path.Join(folder, eastFile), []byte(BuildIcsFile(eastPlan, lang.EN)), 0666)
+		if err != nil {
+			t.Fatalf(`expected no error but got: %v`, err.Error())
+		}
+		err = os.WriteFile(path.Join(folder, westFile), []byte(BuildIcsFile(westPlan, lang.EN)), 0666)
+		if err != nil {
+			t.Fatalf(`expected no error but got: %v`, err.Error())
+		}
+		i++
 	}
 }
 
