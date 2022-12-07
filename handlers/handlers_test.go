@@ -127,7 +127,7 @@ func TestTimezoneApi(t *testing.T) {
 	}
 	router := server.GenerateRouter()
 	w := &testWriter{}
-	r := getRequestFor(`https://www.timegiver.app/api/timezones`)
+	r := getRequestFor(`https://www.host1.com/api/timezones`)
 	r.Method = `POST`
 	body, _ := json.Marshal(TimezoneRequestPayload{
 		Timestamp: `2022-01-02T03:04`,
