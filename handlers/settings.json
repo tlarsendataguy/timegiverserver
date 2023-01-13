@@ -11,7 +11,8 @@
     {
       "Folder": "host2",
       "HostWhitelist": ["something.somewhere.com"],
-      "AllowTimezonesApi": false
+      "AllowTimezonesApi": false,
+      "AllowKneeboardApi": true
     }
   ]
 }

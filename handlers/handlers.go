@@ -35,6 +35,7 @@ type HostInfo struct {
 	HostWhitelist     []string
 	AllowTimezonesApi bool
 	AllowCalculateApi bool
+	AllowKneeboardApi bool
 }
 
 type Server struct {
@@ -100,76 +101,6 @@ func (s *Server) fileHandler(hostFolder string) func(w http.ResponseWriter, r *h
 	}
 }
 
-func (s *Server) handleCalculateApi(w http.ResponseWriter, r *http.Request) {
-	var params CalcPayload
-	var langValue lang.Lang
-	var err error
-	if s.Db != nil {
-		defer func() {
-			insertErr := s.insertApiRequest(params, langValue, err)
-			if insertErr != nil {
-				log.Printf(`error writing to Snowflake: %v`, insertErr.Error())
-			}
-		}()
-	}
-
-	langValue = getLangFromRequest(r)
-	params, err = ValidateCalcPayload(r.Body)
-	if err != nil {
-		writeError(w, err)
-		return
-	}
-	ics := s.generateIcs(params, langValue)
-	if to := params.Email; to != `` {
-		err = s.emailPlan(ics, to)
-		if err != nil {
-			writeError(w, err)
-			return
-		}
-	}
-	w.Header().Add("Content-Type", "text/calendar")
-	_, _ = w.Write([]byte(ics))
-}
-
-func (s *Server) handleTimezoneApi(w http.ResponseWriter, r *http.Request) {
-	var payload TimezoneRequestPayload
-	d := json.NewDecoder(r.Body)
-	err := d.Decode(&payload)
-	if err != nil {
-		writeErrorMsg(w, `JSON payload is invalid`)
-		return
-	}
-	timestamp, err := time.Parse(`2006-01-02T15:04`, payload.Timestamp)
-	if err != nil {
-		writeErrorMsg(w, `Timestamp is not formatted correctly`)
-		return
-	}
-
-	fromOffset, err := s.requestTimezone(payload.From, timestamp)
-	if err != nil {
-		writeErrorMsg(w, fmt.Sprintf(`error obtaining departure timezone: %v`, err.Error()))
-		return
-	}
-	toOffset, err := s.requestTimezone(payload.To, timestamp)
-	if err != nil {
-		writeErrorMsg(w, fmt.Sprintf(`error obtaining arrival timezone: %v`, err.Error()))
-		return
-	}
-
-	response := TimezoneResponsePayload{
-		FromOffset: fromOffset.Offset(),
-		ToOffset:   toOffset.Offset(),
-	}
-	responseBytes, err := json.Marshal(response)
-	if err != nil {
-		writeErrorMsg(w, `the server did not marshall the JSON correctly`)
-		return
-	}
-
-	w.Header().Add("Content-Type", "application/json")
-	_, _ = w.Write(responseBytes)
-}
-
 func (s *Server) CollectHostWhitelist() []string {
 	whitelist := make([]string, 0, 10)
 	for _, hosts := range s.Hosts {
@@ -191,6 +122,9 @@ func (s *Server) GenerateRouter() *mux.Router {
 			}
 			if info.AllowTimezonesApi {
 				sub.Path(`/api/timezones`).Methods(`POST`).HandlerFunc(s.handleTimezoneApi)
+			}
+			if info.AllowKneeboardApi {
+				sub.Path(`/kneeboard`).Methods(`GET`).HandlerFunc(s.handleKneeboardApi)
 			}
 			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
 		}
@@ -254,7 +188,7 @@ func (s *Server) emailPlan(ics string, to string) error {
 	return nil
 }
 
-const insert = `INSERT INTO API_USAGE (EXECUTED,DEPARTURE_OFFSET,ARRIVAL_OFFSET,ARRIVAL_TIME,LANG,DEPARTURE_LOC,ARRIVAL_LOC,WAKE,BREAKFAST,LUNCH,DINNER,SLEEP,ENVIRONMENT,ERRORS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
+const insert = `INSERT INTO TIMEGIVER.PUBLIC.API_USAGE (EXECUTED,DEPARTURE_OFFSET,ARRIVAL_OFFSET,ARRIVAL_TIME,LANG,DEPARTURE_LOC,ARRIVAL_LOC,WAKE,BREAKFAST,LUNCH,DINNER,SLEEP,ENVIRONMENT,ERRORS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
 
 func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handleErr error) error {
 	now := time.Now()

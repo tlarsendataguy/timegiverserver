@@ -207,6 +207,23 @@ func TestRouter(t *testing.T) {
 	t.Logf(err.Error())
 }
 
+func TestKneeboard(t *testing.T) {
+	server, err := LoadServerFromSettings(`conn_str.json`, `TEST`)
+	if err != nil {
+		t.Fatalf(`expected no error but got: %v`, err.Error())
+	}
+	router := server.GenerateRouter()
+	w := &testWriter{}
+	r := getRequestFor(`https://something.somewhere.com/kneeboard?from=ORD&to=TTA`)
+	r.Method = `GET`
+	router.ServeHTTP(w, r)
+	t.Log(string(w.content))
+	if w.status != 200 {
+		t.Fatalf(`expected 200 but got %v`, w.status)
+	}
+
+}
+
 func checkRoute(router *mux.Router, url string) error {
 	match := &mux.RouteMatch{}
 	r := getRequestFor(url)
