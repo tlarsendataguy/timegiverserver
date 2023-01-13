@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 	"timegiverserver/handlers/kneeboard"
 	"timegiverserver/lang"
@@ -85,8 +86,8 @@ func (s *Server) handleTimezoneApi(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleKneeboardApi(w http.ResponseWriter, r *http.Request) {
 	rootPath := filepath.Join(s.ServeFolder, `kneeboard`)
 	variables := r.URL.Query()
-	from := variables.Get(`from`)
-	to := variables.Get(`to`)
+	from := strings.ToUpper(variables.Get(`from`))
+	to := strings.ToUpper(variables.Get(`to`))
 	kb := &kneeboard.Kneeboard{From: from, To: to}
 
 	result, err := s.Db.Query(`SELECT * FROM NASR.PUBLIC.FREQUENCIES WHERE FACILITY IN (?, ?)`, from, to)

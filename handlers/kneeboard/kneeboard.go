@@ -193,13 +193,19 @@ const rwyImagePadding = 25
 const htmlPage = `<html>
 <head>
     <style>
+		@font-face {
+		  font-family: B612;
+		  src: url(B612Mono-Regular.ttf);
+		}
+
         body {
             width: 11.0in;
             height: 8.0in;
             display: flex;
             flex-direction: row;
-            font-size: 12pt;
+            font-size: 11pt;
             margin: 0;
+			font-family: B612;
         }
 
         p {
@@ -239,7 +245,7 @@ const htmlPage = `<html>
             border: 1px solid black;
             padding: 3px;
             margin: 2px 0;
-            font-size: 10pt;
+            font-size: 9pt;
             display: flex;
             flex-direction: row;
         }
@@ -259,7 +265,7 @@ const htmlPage = `<html>
         .image-box {
             width: 200px;
             height: 200px;
-            font-size: 11pt;
+            font-size: 10pt;
             padding: 0 0 5px 5px;
             position: relative;
         }
@@ -292,7 +298,7 @@ const htmlPage = `<html>
 
         .runway-id {
             position: absolute;
-            font-size: 9pt;
+            font-size: 8pt;
             padding: 1px;
             background-color: white;
             border: 1px solid black;
