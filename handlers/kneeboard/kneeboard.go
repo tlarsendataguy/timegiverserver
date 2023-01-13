@@ -142,10 +142,11 @@ func (k *Kneeboard) rwyEndsHtml(facility string) string {
 }
 
 func (k *Kneeboard) CreateRwyImage(facility string, w io.Writer) error {
-	rgba := image.NewRGBA(image.Rect(0, 0, rwyImageSize, rwyImageSize))
+	scaledSize := rwyImageSize * rwyImageScale
+	rgba := image.NewRGBA(image.Rect(0, 0, scaledSize, scaledSize))
 	ctx := gg.NewContextForRGBA(rgba)
 	ctx.SetRGBA255(100, 100, 100, 255)
-	ctx.SetLineWidth(4.0)
+	ctx.SetLineWidth(4.0 * float64(rwyImageScale))
 
 	runways := make([]Runway, 0)
 	for _, runway := range k.Runways {
@@ -156,17 +157,17 @@ func (k *Kneeboard) CreateRwyImage(facility string, w io.Writer) error {
 	}
 
 	transparent := color.RGBA{R: 1, G: 1, B: 1, A: 0}
-	for x := 0; x < rwyImageSize; x++ {
-		for y := 0; y < rwyImageSize; y++ {
+	for x := 0; x < scaledSize; x++ {
+		for y := 0; y < scaledSize; y++ {
 			rgba.SetRGBA(x, y, transparent)
 		}
 	}
 
 	for index := 0; index < len(runways); index += 2 {
-		startX := runways[index].X * rwyImageSize
-		startY := runways[index].Y * rwyImageSize
-		endX := runways[index+1].X * rwyImageSize
-		endY := runways[index+1].Y * rwyImageSize
+		startX := runways[index].X * float64(scaledSize)
+		startY := runways[index].Y * float64(scaledSize)
+		endX := runways[index+1].X * float64(scaledSize)
+		endY := runways[index+1].Y * float64(scaledSize)
 		ctx.DrawLine(startX, startY, endX, endY)
 		ctx.Stroke()
 	}
@@ -189,6 +190,7 @@ const rwyImageTemplate = `            <img src="%v.png" class="runway-image">
 
 const rwyImageSize = 150
 const rwyImagePadding = 25
+const rwyImageScale = 6
 
 const htmlPage = `<html>
 <head>
@@ -272,6 +274,8 @@ const htmlPage = `<html>
         
         .runway-image {
             position: absolute;
+			width: 150px;
+			height: 150px;
             left: 25px;
             top: 25px;
         }
@@ -292,7 +296,7 @@ const htmlPage = `<html>
 
         .elevation {
             position: absolute;
-            bottom: 0;
+            bottom: 5;
             right: 0;
         }
 
@@ -302,6 +306,11 @@ const htmlPage = `<html>
             padding: 1px;
             background-color: white;
             border: 1px solid black;
+        }
+
+        .wind-ring {
+            width: 200px;
+            height: 200px;
         }
     </style>
 </head>
@@ -313,7 +322,7 @@ const htmlPage = `<html>
 {AIRPORT 1 FREQUENCIES}
         </div>
         <div class="image-box">
-            <img src="wind-ring.png">
+            <img src="wind-ring.png" class="wind-ring">
 {AIRPORT 1 RUNWAYS}
             <div class="identifier">{AIRPORT 1 ID}</div>
             <div class="elevation">{AIRPORT 1 ELEVATION}</div>
@@ -335,7 +344,7 @@ const htmlPage = `<html>
 {AIRPORT 2 FREQUENCIES}
         </div>
         <div class="image-box">
-            <img src="wind-ring.png">
+            <img src="wind-ring.png" class="wind-ring">
 {AIRPORT 2 RUNWAYS}
             <div class="identifier">{AIRPORT 2 ID}</div>
             <div class="elevation">{AIRPORT 2 ELEVATION}</div>
