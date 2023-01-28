@@ -77,7 +77,7 @@ func (s *Server) homepageHandler(hostFolder string) func(w http.ResponseWriter, 
 		fullPath := path.Join(s.ServeFolder, hostFolder, `index.html`)
 		content, err := os.ReadFile(fullPath)
 		if err != nil {
-			w.WriteHeader(404)
+			s.handle404(hostFolder, w)
 			return
 		}
 		w.Header().Add("Content-Type", `text/html`)
@@ -90,15 +90,29 @@ func (s *Server) fileHandler(hostFolder string) func(w http.ResponseWriter, r *h
 		fullPath := path.Join(s.ServeFolder, hostFolder, r.URL.Path)
 		content, err := os.ReadFile(fullPath)
 		if err != nil {
-			err404, _ := os.ReadFile(path.Join(s.ServeFolder, hostFolder, `404.html`))
-			w.WriteHeader(404)
-			_, _ = w.Write(err404)
+			s.handle404(hostFolder, w)
 			return
 		}
 		mimeType := mime.TypeByExtension(filepath.Ext(fullPath))
 		w.Header().Add("Content-Type", mimeType)
 		_, _ = w.Write(content)
 	}
+}
+
+func (s *Server) handle404(hostFolder string, w http.ResponseWriter) {
+	err404, _ := os.ReadFile(path.Join(s.ServeFolder, hostFolder, `404.html`))
+	w.WriteHeader(404)
+	_, _ = w.Write(err404)
+}
+
+func (s *Server) notFoundHandler(hostFolder string) func(w http.ResponseWriter, r *http.Request) {
+	return func(w http.ResponseWriter, _ *http.Request) {
+		s.handle404(hostFolder, w)
+	}
+}
+
+func (s *Server) methodNotAllowedHandler(w http.ResponseWriter, _ *http.Request) {
+	w.WriteHeader(405)
 }
 
 func (s *Server) CollectHostWhitelist() []string {
@@ -115,7 +129,7 @@ func (s *Server) GenerateRouter() *mux.Router {
 	for _, info := range s.Hosts {
 		for _, host := range info.HostWhitelist {
 			sub := e.Host(host).Subrouter()
-			sub.Path(`/`).HandlerFunc(s.homepageHandler(info.Folder))
+			sub.Path(`/`).Methods(`GET`).HandlerFunc(s.homepageHandler(info.Folder))
 
 			if info.AllowCalculateApi {
 				sub.Path(`/api/calculate`).Methods(`POST`).HandlerFunc(s.handleCalculateApi)
@@ -126,7 +140,12 @@ func (s *Server) GenerateRouter() *mux.Router {
 			if info.AllowKneeboardApi {
 				sub.Path(`/kneeboard`).Methods(`GET`).HandlerFunc(s.handleKneeboardApi)
 			}
+
 			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
+			sub.PathPrefix(`/.git`).Methods(`GET`).HandlerFunc(s.notFoundHandler(info.Folder))
+			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
+			sub.NotFoundHandler = http.HandlerFunc(s.notFoundHandler(info.Folder))
+			sub.MethodNotAllowedHandler = http.HandlerFunc(s.methodNotAllowedHandler)
 		}
 	}
 
