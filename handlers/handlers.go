@@ -141,7 +141,6 @@ func (s *Server) GenerateRouter() *mux.Router {
 				sub.Path(`/kneeboard`).Methods(`GET`).HandlerFunc(s.handleKneeboardApi)
 			}
 
-			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
 			sub.PathPrefix(`/.git`).Methods(`GET`).HandlerFunc(s.notFoundHandler(info.Folder))
 			sub.PathPrefix(`/`).Methods(`GET`).HandlerFunc(s.fileHandler(info.Folder))
 			sub.NotFoundHandler = http.HandlerFunc(s.notFoundHandler(info.Folder))
