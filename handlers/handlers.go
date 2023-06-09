@@ -190,12 +190,17 @@ func (s *Server) generateIcs(params CalcPayload, langValue lang.Lang) string {
 }
 
 func (s *Server) emailPlan(ics string, to string) error {
+	body, err := os.ReadFile(`./templates/timegiver.html`)
+	if err != nil {
+		return err
+	}
 	e := email.NewEmail()
 	e.From = s.Emailer.From
 	e.To = []string{to}
 	e.Subject = `Timegiver Plan`
-	e.Text = []byte("Attached is your Timegiver plan to beat jet lag on your upcoming trip!\n\n")
-	_, err := e.Attach(strings.NewReader(ics), `Timegiver Plan.ics`, `text/calendar`)
+	e.HTML = body
+	e.Text = []byte{}
+	_, err = e.Attach(strings.NewReader(ics), `Timegiver Plan.ics`, `text/calendar`)
 	if err != nil {
 		return err
 	}

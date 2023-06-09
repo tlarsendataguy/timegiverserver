@@ -20,6 +20,8 @@ func beginCalendar(builder *strings.Builder) {
 	builder.Write([]byte("BEGIN:VCALENDAR\r\n"))
 	builder.Write([]byte("VERSION:2.0\r\n"))
 	builder.Write([]byte("PRODID://tlarsendataguy//timegiver\r\n"))
+	builder.Write([]byte("X-WR-CALNAME: Timegiver\r\n"))
+	builder.Write([]byte("NAME: Timegiver\r\n"))
 }
 
 func endCalendar(builder *strings.Builder) {
