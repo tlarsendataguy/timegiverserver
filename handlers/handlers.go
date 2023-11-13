@@ -17,25 +17,21 @@ import (
 	"strings"
 	"time"
 	"timegiverserver/calculator"
-	"timegiverserver/lang"
 )
 
 type Smtp struct {
-	Host     string
-	Port     string
-	Username string
-	Password string
-	From     string
-	Address  string
-	Auth     smtp.Auth
+	Host    string
+	Port    string
+	From    string
+	Address string
+	Auth    smtp.Auth
 }
 
 type HostInfo struct {
-	Folder            string
-	HostWhitelist     []string
-	AllowTimezonesApi bool
-	AllowCalculateApi bool
-	AllowKneeboardApi bool
+	Folder          string
+	HostWhitelist   []string
+	HasTimegiverApi bool
+	HasKneeboardApi bool
 }
 
 type Server struct {
@@ -46,24 +42,32 @@ type Server struct {
 	Db          *sql.DB
 	MapsApiKey  string
 	Hosts       []HostInfo
-	env         string
+	Test        bool
+	StripeKey   string
 }
 
-func LoadServerFromSettings(settingsFilePath string, environment string) (*Server, error) {
-	settings := &Server{env: environment}
+func LoadServerFromSettings(filename string) (*Server, error) {
+	dbUser := os.Getenv(`DB_USER`)
+	dbPassword := os.Getenv(`DB_PASSWORD`)
+	smtpUser := os.Getenv(`SMTP_USER`)
+	smtpPassword := os.Getenv(`SMTP_PASSWORD`)
+	stripeKey := os.Getenv(`STRIPE_KEY`)
 
-	content, err := os.ReadFile(settingsFilePath)
+	content, err := os.ReadFile(filename)
 	if err != nil {
 		log.Printf(`error reading settings file: %v`, err.Error())
 		return nil, err
 	}
+	settings := &Server{}
 	err = json.Unmarshal(content, settings)
 	if err != nil {
 		log.Printf(`error parsing settings file: %v`, err.Error())
 		return nil, err
 	}
+	settings.DbConnStr = fmt.Sprintf(`%v:%v@%v`, dbUser, dbPassword, settings.DbConnStr)
+	settings.StripeKey = stripeKey
 	settings.Emailer.Address = fmt.Sprintf(`%v:%v`, settings.Emailer.Host, settings.Emailer.Port)
-	settings.Emailer.Auth = smtp.PlainAuth(``, settings.Emailer.Username, settings.Emailer.Password, settings.Emailer.Host)
+	settings.Emailer.Auth = smtp.PlainAuth(``, smtpUser, smtpPassword, settings.Emailer.Host)
 	if settings.DbConnStr != `` {
 		log.Printf(`persisting to Snowflake`)
 		settings.Db, err = sql.Open(`snowflake`, settings.DbConnStr)
@@ -131,13 +135,12 @@ func (s *Server) GenerateRouter() *mux.Router {
 			sub := e.Host(host).Subrouter()
 			sub.Path(`/`).Methods(`GET`).HandlerFunc(s.homepageHandler(info.Folder))
 
-			if info.AllowCalculateApi {
-				sub.Path(`/api/calculate`).Methods(`POST`).HandlerFunc(s.handleCalculateApi)
-			}
-			if info.AllowTimezonesApi {
+			if info.HasTimegiverApi {
+				sub.Path(`/webhook/{sessionId}`).Methods(`POST`).HandlerFunc(s.handleSessionWebhook)
+				sub.Path(`/checkout`).Methods(`POST`).HandlerFunc(s.handleCheckout)
 				sub.Path(`/api/timezones`).Methods(`POST`).HandlerFunc(s.handleTimezoneApi)
 			}
-			if info.AllowKneeboardApi {
+			if info.HasKneeboardApi {
 				sub.Path(`/kneeboard`).Methods(`GET`).HandlerFunc(s.handleKneeboardApi)
 			}
 
@@ -172,7 +175,7 @@ func (s *Server) buildTimezoneUrl(coords Coordinates, timestamp time.Time) strin
 	return fmt.Sprintf(`https://maps.googleapis.com/maps/api/timezone/json?location=%v%%2C%v&timestamp=%v&key=%v`, coords.Lat, coords.Lng, timestamp.Unix(), s.MapsApiKey)
 }
 
-func (s *Server) generateIcs(params CalcPayload, langValue lang.Lang) string {
+func (s *Server) generateIcs(params CalcPayload) calculator.PlanIcs {
 	calc := calculator.InitializeCalculator(calculator.Inputs{
 		Arrival:         params.Arrival,
 		DepartureOffset: params.DepartureOffset,
@@ -186,10 +189,10 @@ func (s *Server) generateIcs(params CalcPayload, langValue lang.Lang) string {
 		},
 	})
 	steps := calc.Plan()
-	return calculator.BuildIcsFile(steps, langValue)
+	return calculator.BuildIcsFiles(steps)
 }
 
-func (s *Server) emailPlan(ics string, to string) error {
+func (s *Server) emailPlan(ics calculator.PlanIcs, to string) error {
 	body, err := os.ReadFile(`./templates/timegiver.html`)
 	if err != nil {
 		return err
@@ -200,7 +203,10 @@ func (s *Server) emailPlan(ics string, to string) error {
 	e.Subject = `Timegiver Plan`
 	e.HTML = body
 	e.Text = []byte{}
-	_, err = e.Attach(strings.NewReader(ics), `Timegiver Plan.ics`, `text/calendar`)
+	_, err = e.Attach(strings.NewReader(ics.Caffeine), `Caffeine Steps.ics`, `text/calendar`)
+	_, err = e.Attach(strings.NewReader(ics.Meals), `Meal Steps.ics`, `text/calendar`)
+	_, err = e.Attach(strings.NewReader(ics.Sleep), `Sleep Steps.ics`, `text/calendar`)
+	_, err = e.Attach(strings.NewReader(ics.Events), `Set Watch.ics`, `text/calendar`)
 	if err != nil {
 		return err
 	}
@@ -209,18 +215,6 @@ func (s *Server) emailPlan(ics string, to string) error {
 		return err
 	}
 	return nil
-}
-
-const insert = `INSERT INTO TIMEGIVER.PUBLIC.API_USAGE (EXECUTED,DEPARTURE_OFFSET,ARRIVAL_OFFSET,ARRIVAL_TIME,LANG,DEPARTURE_LOC,ARRIVAL_LOC,WAKE,BREAKFAST,LUNCH,DINNER,SLEEP,ENVIRONMENT,ERRORS) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)`
-
-func (s *Server) insertApiRequest(params CalcPayload, langValue lang.Lang, handleErr error) error {
-	now := time.Now()
-	handleErrStr := ``
-	if handleErr != nil {
-		handleErrStr = handleErr.Error()
-	}
-	_, err := s.Db.Exec(insert, now, params.DepartureOffset, params.ArrivalOffset, params.Arrival, langValue.String(), params.DepartureLoc, params.ArrivalLoc, params.Wake, params.Breakfast, params.Lunch, params.Dinner, params.Sleep, s.env, handleErrStr)
-	return err
 }
 
 func (s *Server) keepSnowflakeAlive() {
@@ -242,9 +236,4 @@ func writeError(w http.ResponseWriter, err error) {
 func writeErrorMsg(w http.ResponseWriter, msg string) {
 	w.WriteHeader(500)
 	_, _ = w.Write([]byte(msg))
-}
-
-func getLangFromRequest(r *http.Request) lang.Lang {
-	langStr := r.Header.Get(http.CanonicalHeaderKey(`accept-language`))
-	return lang.ParseLang(langStr)
 }

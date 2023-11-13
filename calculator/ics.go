@@ -6,6 +6,22 @@ import (
 	"timegiverserver/lang"
 )
 
+type PlanIcs struct {
+	Caffeine string
+	Meals    string
+	Sleep    string
+	Events   string
+}
+
+func BuildIcsFiles(plan PlanSteps) PlanIcs {
+	files := PlanIcs{}
+	files.Caffeine = BuildIcsFile(plan.Caffeine, lang.EN)
+	files.Meals = BuildIcsFile(plan.Meals, lang.EN)
+	files.Sleep = BuildIcsFile(plan.Sleep, lang.EN)
+	files.Events = BuildIcsFile(plan.Events, lang.EN)
+	return files
+}
+
 func BuildIcsFile(plan []steps.Step, lang lang.Lang) string {
 	builder := &strings.Builder{}
 	beginCalendar(builder)

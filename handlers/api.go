@@ -2,37 +2,49 @@ package handlers
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
-	"log"
+	"github.com/gorilla/mux"
+	"github.com/stripe/stripe-go/v76"
+	"github.com/stripe/stripe-go/v76/checkout/session"
 	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
 	"time"
 	"timegiverserver/handlers/kneeboard"
-	"timegiverserver/lang"
 )
 
-func (s *Server) handleCalculateApi(w http.ResponseWriter, r *http.Request) {
-	var params CalcPayload
-	var langValue lang.Lang
-	var err error
-	if s.Db != nil {
-		defer func() {
-			insertErr := s.insertApiRequest(params, langValue, err)
-			if insertErr != nil {
-				log.Printf(`error writing to Snowflake: %v`, insertErr.Error())
-			}
-		}()
+func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
+	sessionId, ok := mux.Vars(r)[`sessionId`]
+	if !ok {
+		writeError(w, errors.New(`session ID was not provided`))
+		return
 	}
 
-	langValue = getLangFromRequest(r)
-	params, err = ValidateCalcPayload(r.Body)
+	sn, err := session.Get(sessionId, nil)
+	if err != nil {
+		writeError(w, errors.New(fmt.Sprintf(`error getting session %v: %v`, sessionId, err.Error())))
+		return
+	}
+
+	if sn.Status != stripe.CheckoutSessionStatusComplete {
+		writeError(w, errors.New(`checkout has not been completed`))
+		return
+	}
+
+	metadata := metadataPayload{}
+	err = metadata.FromMap(sn.Metadata)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error parsing metadata: %v`, err.Error()))
+		return
+	}
+	params, err := ValidateMetadataPayload(metadata)
 	if err != nil {
 		writeError(w, err)
 		return
 	}
-	ics := s.generateIcs(params, langValue)
+	ics := s.generateIcs(params)
 	if to := params.Email; to != `` {
 		err = s.emailPlan(ics, to)
 		if err != nil {
@@ -40,8 +52,51 @@ func (s *Server) handleCalculateApi(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	}
-	w.Header().Add("Content-Type", "text/calendar")
-	_, _ = w.Write([]byte(ics))
+	w.WriteHeader(200)
+}
+
+func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
+	metadata := metadataPayload{}
+	err := json.NewDecoder(r.Body).Decode(&metadata)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error decoding payload: %v`, err.Error()))
+		return
+	}
+
+	payload, err := ValidateMetadataPayload(metadata)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error validating payload: %v`, err.Error()))
+		return
+	}
+
+	productName := fmt.Sprintf(`Beat jet lag on a trip from %v to %v, arriving %v`, metadata.DepartureLoc, metadata.ArrivalLoc, payload.Arrival.Format(`January 2 at 3:04pm`))
+	println(productName)
+	params := &stripe.CheckoutSessionParams{
+		LineItems: []*stripe.CheckoutSessionLineItemParams{
+			{
+				PriceData: &stripe.CheckoutSessionLineItemPriceDataParams{
+					Currency: stripe.String(`USD`),
+					ProductData: &stripe.CheckoutSessionLineItemPriceDataProductDataParams{
+						Images: nil,
+						Name:   stripe.String(productName),
+					},
+					UnitAmount: stripe.Int64(200),
+				},
+				Quantity: stripe.Int64(1),
+			},
+		},
+		Metadata:   metadata.ToMap(),
+		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL: stripe.String(r.URL.Scheme + "://" + r.URL.Host + `/success.html`),
+	}
+
+	se, err := session.New(params)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error creating new checkout session: %v`, err.Error()))
+		return
+	}
+
+	http.Redirect(w, r, se.URL, http.StatusSeeOther)
 }
 
 func (s *Server) handleTimezoneApi(w http.ResponseWriter, r *http.Request) {
@@ -125,7 +180,7 @@ func (s *Server) handleKneeboardApi(w http.ResponseWriter, r *http.Request) {
 
 	var f *os.File
 	if from != `` {
-		f, err = os.OpenFile(filepath.Join(rootPath, from+`.png`), os.O_CREATE, os.ModePerm)
+		f, err = os.OpenFile(filepath.Join(rootPath, from+`.png`), os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
 		if err != nil {
 			writeError(w, err)
 			return
@@ -139,7 +194,7 @@ func (s *Server) handleKneeboardApi(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if to != `` {
-		f, err = os.OpenFile(filepath.Join(rootPath, to+`.png`), os.O_CREATE, os.ModePerm)
+		f, err = os.OpenFile(filepath.Join(rootPath, to+`.png`), os.O_CREATE|os.O_APPEND|os.O_WRONLY, os.ModePerm)
 		if err != nil {
 			writeError(w, err)
 			return

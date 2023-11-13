@@ -79,7 +79,7 @@ func TestFullPageHtml(t *testing.T) {
 }
 
 func TestImage(t *testing.T) {
-	f, err := os.OpenFile(`RDU.png`, os.O_CREATE, os.ModePerm)
+	f, err := os.OpenFile(`RDU.png`, os.O_APPEND|os.O_WRONLY, os.ModePerm)
 	if err != nil {
 		t.Fatalf(`got error %v`, err.Error())
 	}

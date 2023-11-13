@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	settings, err := handlers.LoadServerFromSettings(`settings.json`, `PROD`)
+	settings, err := handlers.LoadServerFromSettings(`settings.json`)
 	if err != nil {
 		return
 	}

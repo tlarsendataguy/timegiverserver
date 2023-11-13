@@ -1,17 +1,20 @@
 {
-  "CertFolder": "./certs",
-  "ServeFolder": "./serveTest",
+  "DbConnStr": "DSWIBCD-WA71822/TIMEGIVER_TEST/PUBLIC?warehouse=COMPUTE_WH&role=TIMEGIVER_PUBLISH",
+  "Emailer": {
+    "Host":"smtp.sendgrid.net",
+    "Port": "587",
+    "From": "plans@timegiver.app"
+  },
   "Hosts": [
     {
       "Folder": "host1",
       "HostWhitelist": ["host1.com","www.host1.com"],
       "HasTimegiverApi": true,
-      "HasKneeboardApi": true
+      "HasKneeboardApi": false
     },
     {
       "Folder": "host2",
       "HostWhitelist": ["something.somewhere.com"],
-      "HasTimegiverApi": false,
       "HasKneeboardApi": true
     }
   ]

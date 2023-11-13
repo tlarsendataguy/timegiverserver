@@ -23,7 +23,14 @@ type Inputs struct {
 	Routine         DailyRoutine
 }
 
-type CalcPlan func(*Calculator) []steps.Step
+type PlanSteps struct {
+	Caffeine []steps.Step
+	Meals    []steps.Step
+	Sleep    []steps.Step
+	Events   []steps.Step
+}
+
+type CalcPlan func(*Calculator) PlanSteps
 
 type Calculator struct {
 	Dates    base.Dates
@@ -31,12 +38,8 @@ type Calculator struct {
 	calcPlan CalcPlan
 }
 
-func (c *Calculator) Plan() []steps.Step {
+func (c *Calculator) Plan() PlanSteps {
 	return c.calcPlan(c)
-}
-
-func (c *Calculator) arrivalStep() steps.Step {
-	return steps.Arrive{At: c.Dates.ArriveAt}
 }
 
 func (c *Calculator) arrivalAt(t time.Duration) time.Time {

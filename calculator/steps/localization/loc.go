@@ -137,18 +137,6 @@ var HeavyDinner = []StepText{
 	{`吃丰盛晚餐`, `吃一顿丰盛、富含碳水化合物的晚餐。`},
 }
 
-var NoSnack = []StepText{
-	{`Kein Essen`, `Iss keine Mahlzeiten oder Snacks.`},
-	{`No eating`, `Do not eat any meals or snacks.`},
-	{`No comas nada`, `No comas ninguna comida o aperitivo.`},
-	{`Pas de repas`, `Ne mangez aucun repas ni snacks.`},
-	{`कोई खाना नहीं`, `कोई खाना या नाश्ता ना लें॥`},
-	{`食事なし`, `食事や間食を食べないでください。`},
-	{`Sem comer`, `Não coma nenhuma refeição ou lanches.`},
-	{`Никакой еды`, `Не ешьте и не перекусывайте.`},
-	{`不进食`, `不要吃饭或吃零食。`},
-}
-
 var SetWatch = []StepText{
 	{`Uhr stellen`, `Stelle deine Uhr auf die Zielzeit. Du nimmst jetzt den Wechsel vor, um deinen Tag um die Zeitzone des Ziels herum zu organisieren.`},
 	{`Set watch`, `Set your watch to destination time.  You are now making the switch to organize your day around the destination timezone.`},
@@ -171,28 +159,4 @@ var Sleep = []StepText{
 	{`Dormir`, `Vá para a cama o mais rápido possível, usando uma máscara para os olhos, se necessário. Se você não conseguir dormir, então é importante descansar e se desligar do trabalho e atividade social.`},
 	{`Поспите`, `Ложитесь спать как можно раньше, при необходимости с маской для сна. Если заснуть не получается, постарайтесь всё же отдохнуть и воздержаться от работы и социальной активности.`},
 	{`睡觉`, `尽早睡觉，必要时请使用眼罩。如果如法入睡，那么结束工作和社交活动并进行休息就很重要。`},
-}
-
-var NoNap = []StepText{
-	{`Kein Schlaf`, `Unterlasse ein Nickerchen, da dadurch später Schlafmuster gestört werden können.`},
-	{`No sleeping`, `Refrain from napping as this may disrupt later sleep patterns.`},
-	{`No duermas`, `Evita dormir la siesta, ya que puede que eso altere tus patrones de sueño.`},
-	{`Ne pas dormir`, `Évitez de faire une sieste car cela risquerait de perturber ultérieurement le rythme de votre sommeil.`},
-	{`सोना बिल्कुल नहीं`, `जितना जल्दी हो सके, सो जाएं। जरूरत पड़े तो आंख ढंकने का प्रबंध करें। यदि आपको नींद नहीं आ रही है तो यह महत्वपूर्ण है कि आप स्वयं को काम और सामाजिक सरोकारों से दूर कर लें।`},
-	{`睡眠なし`, `後の睡眠パターンを妨害する恐れがあるので、昼寝は控えてください。`},
-	{`Sem Dormir`, `Evite cochilar, pois isso pode perturbar os padrões de sono mais tarde.`},
-	{`Никакого сна`, `Постарайтесь не дремать, это может нарушить ритмы сна.`},
-	{`不睡觉`, `尽量不要小睡，因为这可能会扰乱以后的睡眠规律。`},
-}
-
-var Arrive = []StepText{
-	{`Ankunftszeit`, `Wenn deine Reisevorbereitungen pünktlich ablaufen, solltest du bald an deinem Ziel ankommen.`},
-	{`Arrival time`, `If your travel arrangements are running on time, you should be arriving at your destination.`},
-	{`Hora de llegada`, `Si tu viaje está yendo según lo planeado, deberías estar llegando a tu destino.`},
-	{`Heure d'arrivée`, `Si votre voyage se passe comme prévu, vous devriez bientôt arriver à destination.`},
-	{`आगमन समय`, `यदि आपके यात्रा का प्रबंधन समयानुसार है तो आप अपनी मंजिल पर पहुंच जाएंगे।`},
-	{`到着時間`, `旅程通りに進行していれば、間もなく目的地に到着するはずです。`},
-	{`Horário de Chegada`, `Se os seus planos de viagem estão em execução no momento, você deve estar chegando ao seu destino.`},
-	{`Время прибытия`, `Если все ваши рейсы идут по расписанию, вы должны быть рядом с пунктом назначения.`},
-	{`抵达时间`, `如果出行安排在准时推进，那么您应当很快就会抵达目的地。`},
 }

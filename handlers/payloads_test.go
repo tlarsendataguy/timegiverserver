@@ -1,7 +1,7 @@
 package handlers
 
 import (
-	"bytes"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"testing"
@@ -28,14 +28,6 @@ func TestCalculatorPayload(t *testing.T) {
 	}
 }
 
-func TestInvalidJson(t *testing.T) {
-	body := `hello world`
-	_, err := checkPayload(body)
-	if test := checkError(err, `invalid JSON`); test != nil {
-		t.Fatalf(test.Error())
-	}
-}
-
 func TestEmailNotProvided(t *testing.T) {
 	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	_, err := checkPayload(body)
@@ -47,7 +39,7 @@ func TestEmailNotProvided(t *testing.T) {
 func TestDepartureAndArrivalBothZero(t *testing.T) {
 	body := `{"Email":"me@me.com","Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	_, err := checkPayload(body)
-	if test := checkError(err, `no plan is needed when departure offset is equivalent to arrival offset`); test != nil {
+	if test := checkError(err, `no plan is needed when departure and arrival are in the same time zone`); test != nil {
 		t.Fatalf(test.Error())
 	}
 }
@@ -99,8 +91,12 @@ func TestParseTime(t *testing.T) {
 }
 
 func checkPayload(body string) (CalcPayload, error) {
-	reader := bytes.NewReader([]byte(body))
-	return ValidateCalcPayload(reader)
+	payload := metadataPayload{}
+	err := json.Unmarshal([]byte(body), &payload)
+	if err != nil {
+		return CalcPayload{}, err
+	}
+	return ValidateMetadataPayload(payload)
 }
 
 func checkError(err error, msg string) error {

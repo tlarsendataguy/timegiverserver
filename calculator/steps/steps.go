@@ -90,12 +90,11 @@ func min(left, right int) int {
 }
 
 type NoCaffeine struct {
-	Start time.Time
-	End   time.Time
+	At time.Time
 }
 
 func (s NoCaffeine) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `NoCaffeine`, localization.NoCaffeine[lang], s.Start, s.End)
+	buildIcs(builder, `NoCaffeine`, localization.NoCaffeine[lang], s.At, s.At)
 }
 
 type CaffeineOk struct {
@@ -130,7 +129,7 @@ type LightBreakfast struct {
 }
 
 func (s LightBreakfast) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `LightBreakfast`, localization.LightBreakfast[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `LightBreakfast`, localization.LightBreakfast[lang], s.At, s.At)
 }
 
 type LightLunch struct {
@@ -138,7 +137,7 @@ type LightLunch struct {
 }
 
 func (s LightLunch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `LightLunch`, localization.LightLunch[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `LightLunch`, localization.LightLunch[lang], s.At, s.At)
 }
 
 type LightDinner struct {
@@ -146,7 +145,7 @@ type LightDinner struct {
 }
 
 func (s LightDinner) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `LightDinner`, localization.LightDinner[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `LightDinner`, localization.LightDinner[lang], s.At, s.At)
 }
 
 type LightDinnerOptional struct {
@@ -154,7 +153,7 @@ type LightDinnerOptional struct {
 }
 
 func (s LightDinnerOptional) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `LightDinnerOptional`, localization.LightDinnerOptional[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `LightDinnerOptional`, localization.LightDinnerOptional[lang], s.At, s.At)
 }
 
 type HeavyBreakfast struct {
@@ -162,7 +161,7 @@ type HeavyBreakfast struct {
 }
 
 func (s HeavyBreakfast) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `HeavyBreakfast`, localization.HeavyBreakfast[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `HeavyBreakfast`, localization.HeavyBreakfast[lang], s.At, s.At)
 }
 
 type HeavyLunch struct {
@@ -170,7 +169,7 @@ type HeavyLunch struct {
 }
 
 func (s HeavyLunch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `HeavyLunch`, localization.HeavyLunch[lang], s.At, s.At.Add(time.Hour))
+	buildIcs(builder, `HeavyLunch`, localization.HeavyLunch[lang], s.At, s.At)
 }
 
 type HeavyDinner struct {
@@ -178,16 +177,7 @@ type HeavyDinner struct {
 }
 
 func (s HeavyDinner) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `HeavyDinner`, localization.HeavyDinner[lang], s.At, s.At.Add(time.Hour))
-}
-
-type NoSnack struct {
-	Start time.Time
-	End   time.Time
-}
-
-func (s NoSnack) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `NoSnack`, localization.NoSnack[lang], s.Start, s.End)
+	buildIcs(builder, `HeavyDinner`, localization.HeavyDinner[lang], s.At, s.At)
 }
 
 type Sleep struct {
@@ -199,27 +189,10 @@ func (s Sleep) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `Sleep`, localization.Sleep[lang], s.Start, s.End)
 }
 
-type NoNap struct {
-	Start time.Time
-	End   time.Time
-}
-
-func (s NoNap) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `NoNap`, localization.NoNap[lang], s.Start, s.End)
-}
-
 type SetWatch struct {
 	At time.Time
 }
 
 func (s SetWatch) BuildIcs(builder *strings.Builder, lang lang.Lang) {
 	buildIcs(builder, `SetWatch`, localization.SetWatch[lang], s.At, s.At)
-}
-
-type Arrive struct {
-	At time.Time
-}
-
-func (s Arrive) BuildIcs(builder *strings.Builder, lang lang.Lang) {
-	buildIcs(builder, `Arrive`, localization.Arrive[lang], s.At, s.At)
 }

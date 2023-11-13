@@ -5,18 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
+	"github.com/stripe/stripe-go/v76"
 	"io"
 	"net/http"
 	"net/url"
 	"os"
 	"reflect"
 	"testing"
-	"time"
-	"timegiverserver/lang"
 )
 
 func TestLoadHandler(t *testing.T) {
-	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, err := LoadServerFromSettings(`settings.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -29,7 +28,7 @@ func TestLoadHandler(t *testing.T) {
 }
 
 func TestLoadHomepage(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`)
 	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://www.host1.com/`)
@@ -42,7 +41,7 @@ func TestLoadHomepage(t *testing.T) {
 }
 
 func TestLoadFile(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`)
 	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://www.host1.com/scripts.js`)
@@ -55,7 +54,7 @@ func TestLoadFile(t *testing.T) {
 }
 
 func Test404Response(t *testing.T) {
-	server, _ := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, _ := LoadServerFromSettings(`settings.json`)
 	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://www.host1.com/invalid_file`)
@@ -69,12 +68,12 @@ func Test404Response(t *testing.T) {
 
 func TestCalculateEmail(t *testing.T) {
 	t.Skip(`Skipped by default. This test will send an e-mail and requires a non-tracked server file be created with the necessary SMTP authorization fields`)
-	server, _ := LoadServerFromSettings(`smtp_auth.json`, `TEST`)
+	server, _ := LoadServerFromSettings(`settings_test.json`)
 	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://www.host1.com/api/calculate`)
 	r.Method = `POST`
-	body, _ := json.Marshal(tempPayload{
+	body, _ := json.Marshal(metadataPayload{
 		DepartureOffset: -4,
 		ArrivalOffset:   2,
 		Email:           "larsenthomasj@gmail.com",
@@ -94,34 +93,9 @@ func TestCalculateEmail(t *testing.T) {
 	}
 }
 
-func TestDb(t *testing.T) {
-	t.Skip(`Skipped by default. This test will insert a record into snowflake and requires a non-tracked server file be created with the necessary connection string`)
-	server, err := LoadServerFromSettings(`conn_str.json`, `TEST`)
-	if err != nil {
-		t.Fatalf(`expected no error but got: %v`, err.Error())
-	}
-	params := CalcPayload{
-		DepartureOffset: -4,
-		ArrivalOffset:   2,
-		DepartureLoc:    `Raleigh, NC`,
-		ArrivalLoc:      `Krakow, PL`,
-		Email:           "larsenthomasj@gmail.com",
-		Arrival:         time.Date(2022, 3, 4, 8, 30, 0, 0, time.UTC),
-		Wake:            6 * time.Hour,
-		Breakfast:       7 * time.Hour,
-		Lunch:           12 * time.Hour,
-		Dinner:          17 * time.Hour,
-		Sleep:           22 * time.Hour,
-	}
-	err = server.insertApiRequest(params, lang.EN, nil)
-	if err != nil {
-		t.Fatalf(`expected no error but got: %v`, err.Error())
-	}
-}
-
 func TestTimezoneApi(t *testing.T) {
 	t.Skip(`Skipped by default. This test calls the Google Maps Timezone API`)
-	server, err := LoadServerFromSettings(`maps_api.json`, `TEST`)
+	server, err := LoadServerFromSettings(`settings_test.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -150,7 +124,7 @@ func TestTimezoneApi(t *testing.T) {
 }
 
 func TestHostWhitelist(t *testing.T) {
-	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, err := LoadServerFromSettings(`settings.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -162,7 +136,7 @@ func TestHostWhitelist(t *testing.T) {
 }
 
 func TestRouter(t *testing.T) {
-	server, err := LoadServerFromSettings(`settings.json`, `TEST`)
+	server, err := LoadServerFromSettings(`settings.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
@@ -176,16 +150,10 @@ func TestRouter(t *testing.T) {
 	if err = checkApiRoute(router, `https://www.host1.com/api/timezones`); err != nil {
 		t.Fatalf(err.Error())
 	}
-	if err = checkApiRoute(router, `https://www.host1.com/api/calculate`); err != nil {
-		t.Fatalf(err.Error())
-	}
 	if err = checkRoute(router, `https://host1.com/`); err != nil {
 		t.Fatalf(err.Error())
 	}
 	if err = checkApiRoute(router, `https://host1.com/api/timezones`); err != nil {
-		t.Fatalf(err.Error())
-	}
-	if err = checkApiRoute(router, `https://host1.com/api/calculate`); err != nil {
 		t.Fatalf(err.Error())
 	}
 	if err = checkRoute(router, `https://host1.com/index.html`); err != nil {
@@ -197,21 +165,33 @@ func TestRouter(t *testing.T) {
 	if err = checkRoute(router, `https://something.somewhere.com/index.html`); err != nil {
 		t.Fatalf(err.Error())
 	}
-	if err = checkApiRoute(router, `https://something.somewhere.com/api/timezones`); err == nil {
-		t.Fatalf(`expected an error but got none`)
+
+	w := &testWriter{}
+	r := getRequestFor(`https://something.somewhere.com/api/timezones`)
+	r.Method = `POST`
+	router.ServeHTTP(w, r)
+	if w.status != 405 {
+		t.Fatalf(`expected status 405 but got %v`, w.status)
 	}
-	t.Logf(err.Error())
-	if err = checkApiRoute(router, `https://something.somewhere.com/api/calculate`); err == nil {
-		t.Fatalf(`expected an error but got none`)
+
+	r = getRequestFor(`https://something.somewhere.com/api/calculate`)
+	r.Method = `POST`
+	router.ServeHTTP(w, r)
+	if w.status != 405 {
+		t.Fatalf(`expected status 405 but got %v`, w.status)
 	}
-	t.Logf(err.Error())
 }
 
 func TestKneeboard(t *testing.T) {
-	server, err := LoadServerFromSettings(`conn_str.json`, `TEST`)
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf(`got error %v`, err.Error())
+	}
+	server, err := LoadServerFromSettings(`settings_test.json`)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
 	}
+	server.ServeFolder = wd
 	router := server.GenerateRouter()
 	w := &testWriter{}
 	r := getRequestFor(`https://something.somewhere.com/kneeboard?from=ORD&to=TTA`)
@@ -221,7 +201,37 @@ func TestKneeboard(t *testing.T) {
 	if w.status != 200 {
 		t.Fatalf(`expected 200 but got %v`, w.status)
 	}
+}
 
+func TestCheckout(t *testing.T) {
+	server, err := LoadServerFromSettings(`settings_test.json`)
+	if err != nil {
+		t.Fatalf(`got error %v`, err.Error())
+	}
+	stripe.Key = server.StripeKey
+	router := server.GenerateRouter()
+	w := &testWriter{}
+	r := getRequestFor(`https://www.host1.com/checkout`)
+	r.Method = `POST`
+	body, _ := json.Marshal(metadataPayload{
+		DepartureOffset: -1,
+		ArrivalOffset:   2,
+		DepartureLoc:    "Dublin",
+		ArrivalLoc:      "Moscow",
+		Email:           "me@me.com",
+		Arrival:         "2020-06-07T08:09",
+		Wake:            "07:00",
+		Breakfast:       "08:00",
+		Lunch:           "12:00",
+		Dinner:          "17:00",
+		Sleep:           "23:00",
+	})
+	r.Body = io.NopCloser(bytes.NewReader(body))
+	router.ServeHTTP(w, r)
+	if w.status != http.StatusSeeOther {
+		t.Log(string(w.content))
+		t.Fatalf(`expected status %v but got %v`, http.StatusSeeOther, w.status)
+	}
 }
 
 func checkRoute(router *mux.Router, url string) error {
@@ -236,10 +246,8 @@ func checkRoute(router *mux.Router, url string) error {
 func checkApiRoute(router *mux.Router, url string) error {
 	match := &mux.RouteMatch{}
 	r := requestFor(url, `POST`)
-	if success := router.Match(r, match); !success {
-		return match.MatchErr
-	}
-	return nil
+	router.Match(r, match)
+	return match.MatchErr
 }
 
 func checkResponse(w *testWriter, expectedStatus int, expectedFile string) error {

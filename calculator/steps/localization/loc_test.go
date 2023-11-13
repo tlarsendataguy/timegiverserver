@@ -38,19 +38,10 @@ func TestLocCompleteness(t *testing.T) {
 	if qty := len(HeavyDinner); qty != expectedQty {
 		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
-	if qty := len(NoSnack); qty != expectedQty {
-		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
-	}
 	if qty := len(SetWatch); qty != expectedQty {
 		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
 	if qty := len(Sleep); qty != expectedQty {
-		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
-	}
-	if qty := len(NoNap); qty != expectedQty {
-		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
-	}
-	if qty := len(Arrive); qty != expectedQty {
 		t.Fatalf(`required %v translations but got %v`, expectedQty, qty)
 	}
 }

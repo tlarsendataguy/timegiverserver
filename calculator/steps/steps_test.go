@@ -48,8 +48,8 @@ func getIcsString(step Step, lang lang.Lang) string {
 }
 
 func TestNoCaffeineToIcs(t *testing.T) {
-	ics := getIcsString(NoCaffeine{Start: start, End: end}, lang.EN)
-	expected := "BEGIN:VEVENT\r\nUID:20220102T030000ZNoCaffeine@timegiver.app\r\nDTSTAMP:20220102T030000Z\r\nDTSTART:20220102T030000Z\r\nDTEND:20220102T043000Z\r\nSUMMARY:No caffeine\r\nDESCRIPTION:Refrain from consuming caffeine.  In addition to coffee and tea\r\n , caffeine may also be present in soft drinks and chocolate.\r\nBEGIN:VALARM\r\nTRIGGER;RELATED=START:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:No caffeine\r\nEND:VALARM\r\nCATEGORIES:TimeGiver\r\nEND:VEVENT\r\n"
+	ics := getIcsString(NoCaffeine{At: start}, lang.EN)
+	expected := "BEGIN:VEVENT\r\nUID:20220102T030000ZNoCaffeine@timegiver.app\r\nDTSTAMP:20220102T030000Z\r\nDTSTART:20220102T030000Z\r\nDTEND:20220102T030000Z\r\nSUMMARY:No caffeine\r\nDESCRIPTION:Refrain from consuming caffeine.  In addition to coffee and tea\r\n , caffeine may also be present in soft drinks and chocolate.\r\nBEGIN:VALARM\r\nTRIGGER;RELATED=START:PT0M\r\nACTION:DISPLAY\r\nDESCRIPTION:No caffeine\r\nEND:VALARM\r\nCATEGORIES:TimeGiver\r\nEND:VEVENT\r\n"
 	if ics != expected {
 		t.Fatalf("expected\n\n%v\n\nbut got\n\n%v", expected, ics)
 	}
@@ -166,17 +166,6 @@ func TestHeavyDinnerToIcs(t *testing.T) {
 	t.Log(ics)
 }
 
-func TestNoSnackToIcs(t *testing.T) {
-	ics := getIcsString(NoSnack{Start: start, End: end}, lang.ZH)
-	if !strings.Contains(ics, `NoSnack`) {
-		t.Fatalf(`ics did not have the expected step ID`)
-	}
-	if !strings.Contains(ics, localization.NoSnack[lang.ZH].Title) {
-		t.Fatalf(`ics does not contain expected localized title`)
-	}
-	t.Log(ics)
-}
-
 func TestSleepToIcs(t *testing.T) {
 	ics := getIcsString(Sleep{Start: start, End: end}, lang.EN)
 	if !strings.Contains(ics, `Sleep`) {
@@ -188,34 +177,12 @@ func TestSleepToIcs(t *testing.T) {
 	t.Log(ics)
 }
 
-func TestNoNapToIcs(t *testing.T) {
-	ics := getIcsString(NoNap{Start: start, End: end}, lang.EN)
-	if !strings.Contains(ics, `NoNap`) {
-		t.Fatalf(`ics did not have the expected step ID`)
-	}
-	if !strings.Contains(ics, localization.NoNap[lang.EN].Title) {
-		t.Fatalf(`ics does not contain expected localized title`)
-	}
-	t.Log(ics)
-}
-
 func TestSetWatchToIcs(t *testing.T) {
 	ics := getIcsString(SetWatch{At: start}, lang.EN)
 	if !strings.Contains(ics, `SetWatch`) {
 		t.Fatalf(`ics did not have the expected step ID`)
 	}
 	if !strings.Contains(ics, localization.SetWatch[lang.EN].Title) {
-		t.Fatalf(`ics does not contain expected localized title`)
-	}
-	t.Log(ics)
-}
-
-func TestArriveToIcs(t *testing.T) {
-	ics := getIcsString(Arrive{At: start}, lang.EN)
-	if !strings.Contains(ics, `Arrive`) {
-		t.Fatalf(`ics did not have the expected step ID`)
-	}
-	if !strings.Contains(ics, localization.Arrive[lang.EN].Title) {
 		t.Fatalf(`ics does not contain expected localized title`)
 	}
 	t.Log(ics)
