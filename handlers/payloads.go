@@ -10,6 +10,10 @@ import (
 	"time"
 )
 
+type CheckoutUrlPayload struct {
+	CheckoutUrl string
+}
+
 type CalcPayload struct {
 	DepartureOffset float64
 	ArrivalOffset   float64
@@ -43,7 +47,7 @@ func (m metadataPayload) ToMap() map[string]string {
 	result[`DepartureLoc`] = m.DepartureLoc
 	result[`ArrivalLoc`] = m.ArrivalLoc
 	result[`Email`] = m.Email
-	result[`Arrival`] = m.Email
+	result[`Arrival`] = m.Arrival
 	result[`Wake`] = m.Wake
 	result[`Breakfast`] = m.Breakfast
 	result[`Lunch`] = m.Lunch
@@ -52,15 +56,16 @@ func (m metadataPayload) ToMap() map[string]string {
 	return result
 }
 
-func (m metadataPayload) FromMap(source map[string]string) error {
+func MetadataFromMap(source map[string]string) (metadataPayload, error) {
+	var m metadataPayload
 	var err error
 	m.DepartureOffset, err = strconv.ParseFloat(source[`DepartureOffset`], 64)
 	if err != nil {
-		return err
+		return m, err
 	}
 	m.ArrivalOffset, err = strconv.ParseFloat(source[`ArrivalOffset`], 64)
 	if err != nil {
-		return err
+		return m, err
 	}
 	m.DepartureLoc = source[`DepartureLoc`]
 	m.ArrivalLoc = source[`ArrivalLoc`]
@@ -70,15 +75,19 @@ func (m metadataPayload) FromMap(source map[string]string) error {
 	m.Lunch = source[`Lunch`]
 	m.Dinner = source[`Dinner`]
 	m.Sleep = source[`Sleep`]
-	return nil
+	m.Email = source[`Email`]
+	return m, nil
 }
 
 func ValidateMetadataPayload(payload metadataPayload) (CalcPayload, error) {
 	email := payload.Email
-	if email != `` {
-		if _, emailErr := mail.ParseAddress(email); emailErr != nil {
-			return CalcPayload{}, errors.New(`a valid e-mail address was not provided`)
-		}
+
+	if email == `` {
+		return CalcPayload{}, errors.New(`a valid e-mail address was not provided`)
+	}
+
+	if _, emailErr := mail.ParseAddress(email); emailErr != nil {
+		return CalcPayload{}, errors.New(`a valid e-mail address was not provided`)
 	}
 
 	if math.Trunc(payload.DepartureOffset) == math.Trunc(payload.ArrivalOffset) {

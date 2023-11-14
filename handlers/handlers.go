@@ -7,6 +7,7 @@ import (
 	"github.com/gorilla/mux"
 	"github.com/jordan-wright/email"
 	_ "github.com/snowflakedb/gosnowflake"
+	"github.com/stripe/stripe-go/v76"
 	"log"
 	"mime"
 	"net/http"
@@ -35,15 +36,16 @@ type HostInfo struct {
 }
 
 type Server struct {
-	CertFolder  string
-	ServeFolder string
-	Emailer     Smtp
-	DbConnStr   string
-	Db          *sql.DB
-	MapsApiKey  string
-	Hosts       []HostInfo
-	Test        bool
-	StripeKey   string
+	CertFolder           string
+	ServeFolder          string
+	Emailer              Smtp
+	DbConnStr            string
+	Db                   *sql.DB
+	MapsApiKey           string
+	Hosts                []HostInfo
+	Test                 bool
+	StripeKey            string
+	WebhookSigningSecret string
 }
 
 func LoadServerFromSettings(filename string) (*Server, error) {
@@ -52,6 +54,10 @@ func LoadServerFromSettings(filename string) (*Server, error) {
 	smtpUser := os.Getenv(`SMTP_USER`)
 	smtpPassword := os.Getenv(`SMTP_PASSWORD`)
 	stripeKey := os.Getenv(`STRIPE_KEY`)
+	mapsApiKey := os.Getenv(`MAPS_API_KEY`)
+	webhookSigningSecret := os.Getenv(`WEBHOOK_SIGNING_SECRET`)
+
+	stripe.Key = stripeKey
 
 	content, err := os.ReadFile(filename)
 	if err != nil {
@@ -68,6 +74,8 @@ func LoadServerFromSettings(filename string) (*Server, error) {
 	settings.StripeKey = stripeKey
 	settings.Emailer.Address = fmt.Sprintf(`%v:%v`, settings.Emailer.Host, settings.Emailer.Port)
 	settings.Emailer.Auth = smtp.PlainAuth(``, smtpUser, smtpPassword, settings.Emailer.Host)
+	settings.MapsApiKey = mapsApiKey
+	settings.WebhookSigningSecret = webhookSigningSecret
 	if settings.DbConnStr != `` {
 		log.Printf(`persisting to Snowflake`)
 		settings.Db, err = sql.Open(`snowflake`, settings.DbConnStr)
@@ -136,7 +144,7 @@ func (s *Server) GenerateRouter() *mux.Router {
 			sub.Path(`/`).Methods(`GET`).HandlerFunc(s.homepageHandler(info.Folder))
 
 			if info.HasTimegiverApi {
-				sub.Path(`/webhook/{sessionId}`).Methods(`POST`).HandlerFunc(s.handleSessionWebhook)
+				sub.Path(`/webhook`).Methods(`POST`).HandlerFunc(s.handleSessionWebhook)
 				sub.Path(`/checkout`).Methods(`POST`).HandlerFunc(s.handleCheckout)
 				sub.Path(`/api/timezones`).Methods(`POST`).HandlerFunc(s.handleTimezoneApi)
 			}
@@ -204,8 +212,17 @@ func (s *Server) emailPlan(ics calculator.PlanIcs, to string) error {
 	e.HTML = body
 	e.Text = []byte{}
 	_, err = e.Attach(strings.NewReader(ics.Caffeine), `Caffeine Steps.ics`, `text/calendar`)
+	if err != nil {
+		return err
+	}
 	_, err = e.Attach(strings.NewReader(ics.Meals), `Meal Steps.ics`, `text/calendar`)
+	if err != nil {
+		return err
+	}
 	_, err = e.Attach(strings.NewReader(ics.Sleep), `Sleep Steps.ics`, `text/calendar`)
+	if err != nil {
+		return err
+	}
 	_, err = e.Attach(strings.NewReader(ics.Events), `Set Watch.ics`, `text/calendar`)
 	if err != nil {
 		return err

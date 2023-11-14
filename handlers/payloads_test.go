@@ -52,6 +52,14 @@ func TestInvalidEmail(t *testing.T) {
 	}
 }
 
+func TestBlankEmail(t *testing.T) {
+	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"","Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
+	_, err := checkPayload(body)
+	if test := checkError(err, `a valid e-mail address was not provided`); test != nil {
+		t.Fatalf(test.Error())
+	}
+}
+
 func TestArrivalNotProvided(t *testing.T) {
 	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"me@me.com","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	_, err := checkPayload(body)
@@ -87,6 +95,30 @@ func TestParseTime(t *testing.T) {
 	_, err = parseTime(``)
 	if err == nil {
 		t.Fatalf(`expected an error but got none`)
+	}
+}
+
+func TestParseMetadata(t *testing.T) {
+	source := map[string]string{
+		"Wake":            "06:00",
+		"Email":           "larsenthomasj@gmail.com",
+		"ArrivalOffset":   "1",
+		"Arrival":         "2023-12-30T20:07",
+		"ArrivalLoc":      "Zürich, Switzerland",
+		"Lunch":           "12:00",
+		"Breakfast":       "07:00",
+		"Dinner":          "18:00",
+		"DepartureLoc":    "Raleigh, NC, USA",
+		"DepartureOffset": "-5",
+		"Sleep":           "22:00",
+	}
+
+	metadata, err := MetadataFromMap(source)
+	if err != nil {
+		t.Fatalf(`got error %v`, err.Error())
+	}
+	if metadata.ArrivalOffset != 1 {
+		t.Fatalf(`expected 1 but got %v`, metadata.ArrivalOffset)
 	}
 }
 

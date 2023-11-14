@@ -4,9 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/gorilla/mux"
 	"github.com/stripe/stripe-go/v76"
 	"github.com/stripe/stripe-go/v76/checkout/session"
+	"github.com/stripe/stripe-go/v76/webhook"
+	"io"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -16,15 +17,27 @@ import (
 )
 
 func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
-	sessionId, ok := mux.Vars(r)[`sessionId`]
-	if !ok {
-		writeError(w, errors.New(`session ID was not provided`))
+	payload, err := io.ReadAll(r.Body)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error reading request body: %v`, err.Error()))
 		return
 	}
 
-	sn, err := session.Get(sessionId, nil)
+	event, err := webhook.ConstructEvent(payload, r.Header.Get(`Stripe-Signature`), s.WebhookSigningSecret)
 	if err != nil {
-		writeError(w, errors.New(fmt.Sprintf(`error getting session %v: %v`, sessionId, err.Error())))
+		writeError(w, fmt.Errorf(`error constructing event: %v`, err.Error()))
+		return
+	}
+
+	if event.Type != `checkout.session.completed` {
+		writeError(w, fmt.Errorf(`expecting 'checkout.session.completed' event but got '%v'`, event.Type))
+		return
+	}
+
+	var sn stripe.CheckoutSession
+	err = json.Unmarshal(event.Data.Raw, &sn)
+	if err != nil {
+		writeError(w, fmt.Errorf(`error parsing checkout session: %v`, err.Error()))
 		return
 	}
 
@@ -33,8 +46,7 @@ func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	metadata := metadataPayload{}
-	err = metadata.FromMap(sn.Metadata)
+	metadata, err := MetadataFromMap(sn.Metadata)
 	if err != nil {
 		writeError(w, fmt.Errorf(`error parsing metadata: %v`, err.Error()))
 		return
@@ -45,13 +57,13 @@ func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	ics := s.generateIcs(params)
-	if to := params.Email; to != `` {
-		err = s.emailPlan(ics, to)
-		if err != nil {
-			writeError(w, err)
-			return
-		}
+
+	err = s.emailPlan(ics, params.Email)
+	if err != nil {
+		writeError(w, err)
+		return
 	}
+
 	w.WriteHeader(200)
 }
 
@@ -70,7 +82,6 @@ func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	productName := fmt.Sprintf(`Beat jet lag on a trip from %v to %v, arriving %v`, metadata.DepartureLoc, metadata.ArrivalLoc, payload.Arrival.Format(`January 2 at 3:04pm`))
-	println(productName)
 	params := &stripe.CheckoutSessionParams{
 		LineItems: []*stripe.CheckoutSessionLineItemParams{
 			{
@@ -87,7 +98,7 @@ func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
 		},
 		Metadata:   metadata.ToMap(),
 		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String(r.URL.Scheme + "://" + r.URL.Host + `/success.html`),
+		SuccessURL: stripe.String("https://" + r.Host + `/success.html`),
 	}
 
 	se, err := session.New(params)
@@ -96,7 +107,7 @@ func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	http.Redirect(w, r, se.URL, http.StatusSeeOther)
+	_, _ = w.Write([]byte(se.URL))
 }
 
 func (s *Server) handleTimezoneApi(w http.ResponseWriter, r *http.Request) {
