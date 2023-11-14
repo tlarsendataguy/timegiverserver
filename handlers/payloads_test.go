@@ -9,7 +9,7 @@ import (
 )
 
 func TestCalculatorPayload(t *testing.T) {
-	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"me@me.com","Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
+	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	payload, err := checkPayload(body)
 	if err != nil {
 		t.Fatalf(`expected no error but got: %v`, err.Error())
@@ -19,9 +19,6 @@ func TestCalculatorPayload(t *testing.T) {
 	}
 	if payload.ArrivalOffset != -4.5 {
 		t.Fatalf(`expected -4.5 but got %v`, payload.ArrivalOffset)
-	}
-	if payload.Email != `me@me.com` {
-		t.Fatalf(`expected 'me@me.com' but got '%v'`, payload.Email)
 	}
 	if !payload.Arrival.Equal(time.Date(2022, 1, 2, 3, 4, 0, 0, time.UTC)) {
 		t.Fatalf(`expected '2022-01-02 03:04:00' but got '%v'`, payload.Arrival)
@@ -44,24 +41,8 @@ func TestDepartureAndArrivalBothZero(t *testing.T) {
 	}
 }
 
-func TestInvalidEmail(t *testing.T) {
-	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"hello world","Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
-	_, err := checkPayload(body)
-	if test := checkError(err, `a valid e-mail address was not provided`); test != nil {
-		t.Fatalf(test.Error())
-	}
-}
-
-func TestBlankEmail(t *testing.T) {
-	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"","Arrival":"2022-01-02T03:04","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
-	_, err := checkPayload(body)
-	if test := checkError(err, `a valid e-mail address was not provided`); test != nil {
-		t.Fatalf(test.Error())
-	}
-}
-
 func TestArrivalNotProvided(t *testing.T) {
-	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"me@me.com","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
+	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	_, err := checkPayload(body)
 	if test := checkError(err, `invalid date provided for Arrival`); test != nil {
 		t.Fatalf(test.Error())
@@ -69,7 +50,7 @@ func TestArrivalNotProvided(t *testing.T) {
 }
 
 func TestInvalidArrival(t *testing.T) {
-	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Email":"me@me.com","Arrival":"20220102T030400Z","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
+	body := `{"DepartureOffset":0,"ArrivalOffset":-4.5,"Arrival":"20220102T030400Z","Wake":"06:00","Breakfast":"07:00","Lunch":"12:00","Dinner":"17:00","Sleep":"22:00"}`
 	_, err := checkPayload(body)
 	if test := checkError(err, `invalid date provided for Arrival`); test != nil {
 		t.Fatalf(test.Error())
@@ -101,7 +82,6 @@ func TestParseTime(t *testing.T) {
 func TestParseMetadata(t *testing.T) {
 	source := map[string]string{
 		"Wake":            "06:00",
-		"Email":           "larsenthomasj@gmail.com",
 		"ArrivalOffset":   "1",
 		"Arrival":         "2023-12-30T20:07",
 		"ArrivalLoc":      "Zürich, Switzerland",
@@ -123,7 +103,7 @@ func TestParseMetadata(t *testing.T) {
 }
 
 func checkPayload(body string) (CalcPayload, error) {
-	payload := metadataPayload{}
+	payload := MetadataPayload{}
 	err := json.Unmarshal([]byte(body), &payload)
 	if err != nil {
 		return CalcPayload{}, err

@@ -5,7 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
-	"github.com/stripe/stripe-go/v76"
 	"io"
 	"net/http"
 	"net/url"
@@ -73,10 +72,9 @@ func TestCalculateEmail(t *testing.T) {
 	w := &testWriter{}
 	r := getRequestFor(`https://www.host1.com/api/calculate`)
 	r.Method = `POST`
-	body, _ := json.Marshal(metadataPayload{
+	body, _ := json.Marshal(MetadataPayload{
 		DepartureOffset: -4,
 		ArrivalOffset:   2,
-		Email:           "larsenthomasj@gmail.com",
 		Arrival:         `2020-03-04T08:30`,
 		Wake:            `06:00`,
 		Breakfast:       `07:00`,
@@ -200,37 +198,6 @@ func TestKneeboard(t *testing.T) {
 	t.Log(string(w.content))
 	if w.status != 200 {
 		t.Fatalf(`expected 200 but got %v`, w.status)
-	}
-}
-
-func TestCheckout(t *testing.T) {
-	server, err := LoadServerFromSettings(`settings_test.json`)
-	if err != nil {
-		t.Fatalf(`got error %v`, err.Error())
-	}
-	stripe.Key = server.StripeKey
-	router := server.GenerateRouter()
-	w := &testWriter{}
-	r := getRequestFor(`https://www.host1.com/checkout`)
-	r.Method = `POST`
-	body, _ := json.Marshal(metadataPayload{
-		DepartureOffset: -1,
-		ArrivalOffset:   2,
-		DepartureLoc:    "Dublin",
-		ArrivalLoc:      "Moscow",
-		Email:           "me@me.com",
-		Arrival:         "2020-06-07T08:09",
-		Wake:            "07:00",
-		Breakfast:       "08:00",
-		Lunch:           "12:00",
-		Dinner:          "17:00",
-		Sleep:           "23:00",
-	})
-	r.Body = io.NopCloser(bytes.NewReader(body))
-	router.ServeHTTP(w, r)
-	if w.status != http.StatusSeeOther {
-		t.Log(string(w.content))
-		t.Fatalf(`expected status %v but got %v`, http.StatusSeeOther, w.status)
 	}
 }
 

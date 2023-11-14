@@ -58,7 +58,7 @@ func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
 	}
 	ics := s.generateIcs(params)
 
-	err = s.emailPlan(ics, params.Email)
+	err = s.emailPlan(ics, sn.CustomerDetails.Email)
 	if err != nil {
 		writeError(w, err)
 		return
@@ -68,7 +68,7 @@ func (s *Server) handleSessionWebhook(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
-	metadata := metadataPayload{}
+	metadata := MetadataPayload{}
 	err := json.NewDecoder(r.Body).Decode(&metadata)
 	if err != nil {
 		writeError(w, fmt.Errorf(`error decoding payload: %v`, err.Error()))
