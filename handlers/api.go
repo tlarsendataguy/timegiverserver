@@ -91,7 +91,7 @@ func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
 						Images: nil,
 						Name:   stripe.String(productName),
 					},
-					UnitAmount: stripe.Int64(200),
+					UnitAmount: stripe.Int64(150),
 				},
 				Quantity: stripe.Int64(1),
 			},
