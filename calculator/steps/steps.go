@@ -1,11 +1,14 @@
 package steps
 
 import (
+	"fmt"
 	"strings"
 	"time"
 	"timegiverserver/calculator/steps/localization"
 	"timegiverserver/lang"
 )
+
+const url = `https://www.timegiver.app`
 
 type Step interface {
 	BuildIcs(builder *strings.Builder, lang lang.Lang)
@@ -56,8 +59,12 @@ func writeDates(s *strings.Builder, start, end time.Time) {
 func writeTexts(s *strings.Builder, texts localization.StepText) {
 	wrap(s, "SUMMARY:", texts.Title)
 	s.Write([]byte("\r\n"))
-	wrap(s, "DESCRIPTION:", texts.Description)
+	wrap(s, "DESCRIPTION:", fmt.Sprintf(`%v\n\nGet another plan at %v`, texts.Description, url))
 	s.Write([]byte("\r\n"))
+}
+
+func writeUrl(s *strings.Builder) {
+	s.Write([]byte(fmt.Sprintf("URL:%v\r\n", url)))
 }
 
 func writeAlarm(s *strings.Builder, texts localization.StepText) {
@@ -78,6 +85,7 @@ func buildIcs(builder *strings.Builder, stepId string, texts localization.StepTe
 	writeUid(builder, start, stepId)
 	writeDates(builder, start, end)
 	writeTexts(builder, texts)
+	writeUrl(builder)
 	writeAlarm(builder, texts)
 	endEvent(builder)
 }

@@ -1,5 +1,5 @@
 {
-  "DbConnStr": "DSWIBCD-WA71822/TIMEGIVER_TEST/PUBLIC?warehouse=COMPUTE_WH&role=TIMEGIVER_PUBLISH",
+  "DbConnStr": "DSWIBCD-WA71822?warehouse=COMPUTE_WH&role=TIMEGIVER_PUBLISH",
   "Emailer": {
     "Host":"smtp.sendgrid.net",
     "Port": "587",
