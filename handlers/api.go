@@ -96,9 +96,10 @@ func (s *Server) handleCheckout(w http.ResponseWriter, r *http.Request) {
 				Quantity: stripe.Int64(1),
 			},
 		},
-		Metadata:   metadata.ToMap(),
-		Mode:       stripe.String(string(stripe.CheckoutSessionModePayment)),
-		SuccessURL: stripe.String("https://" + r.Host + `/success.html`),
+		AllowPromotionCodes: stripe.Bool(true),
+		Metadata:            metadata.ToMap(),
+		Mode:                stripe.String(string(stripe.CheckoutSessionModePayment)),
+		SuccessURL:          stripe.String("https://" + r.Host + `/success.html`),
 	}
 
 	se, err := session.New(params)
